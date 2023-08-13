@@ -1,13 +1,14 @@
-#include <myproject/sample_library.hpp>
+#include <cucumber_cpp_runner/sample_library.hpp>
 
 int factorial(int input) noexcept
 {
-  int result = 1;
+	int result = 1;
 
-  while (input > 0) {
-    result *= input;
-    --input;
-  }
+	while (input > 0)
+	{
+		result *= input;
+		--input;
+	}
 
-  return result;
+	return result;
 }
