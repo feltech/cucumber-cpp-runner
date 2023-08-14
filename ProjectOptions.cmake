@@ -31,7 +31,9 @@ macro(cucumber_cpp_runner_setup_options)
 	cucumber_cpp_runner_supports_sanitizers()
 
 	if (NOT PROJECT_IS_TOP_LEVEL OR cucumber_cpp_runner_PACKAGING_MAINTAINER_MODE)
-		option(cucumber_cpp_runner_ENABLE_IPO "Enable IPO/LTO" OFF)
+		option(cucumber_cpp_runner_ENABLE_IPO "Enable IPO/LTO" ON)
+		option(cucumber_cpp_runner_ENABLE_TESTS "Enable test targets" OFF)
+		option(cucumber_cpp_runner_ENABLE_IPO "Enable IPO/LTO" ON)
 		option(cucumber_cpp_runner_WARNINGS_AS_ERRORS "Treat Warnings As Errors" OFF)
 		option(cucumber_cpp_runner_ENABLE_USER_LINKER "Enable user-selected linker" OFF)
 		option(cucumber_cpp_runner_ENABLE_SANITIZER_ADDRESS "Enable address sanitizer" OFF)
@@ -42,9 +44,11 @@ macro(cucumber_cpp_runner_setup_options)
 		option(cucumber_cpp_runner_ENABLE_UNITY_BUILD "Enable unity builds" OFF)
 		option(cucumber_cpp_runner_ENABLE_CLANG_TIDY "Enable clang-tidy" OFF)
 		option(cucumber_cpp_runner_ENABLE_CPPCHECK "Enable cpp-check analysis" OFF)
+		option(cucumber_cpp_runner_ENABLE_INCLUDE_WHAT_YOU_USE "Enable include-what-you-use analysis" OFF)
 		option(cucumber_cpp_runner_ENABLE_PCH "Enable precompiled headers" OFF)
 		option(cucumber_cpp_runner_ENABLE_CACHE "Enable ccache" OFF)
 	else ()
+		option(cucumber_cpp_runner_ENABLE_TESTS "Enable test targets" ON)
 		option(cucumber_cpp_runner_ENABLE_IPO "Enable IPO/LTO" ON)
 		option(cucumber_cpp_runner_WARNINGS_AS_ERRORS "Treat Warnings As Errors" ON)
 		option(cucumber_cpp_runner_ENABLE_USER_LINKER "Enable user-selected linker" OFF)
@@ -56,6 +60,7 @@ macro(cucumber_cpp_runner_setup_options)
 		option(cucumber_cpp_runner_ENABLE_UNITY_BUILD "Enable unity builds" OFF)
 		option(cucumber_cpp_runner_ENABLE_CLANG_TIDY "Enable clang-tidy" ON)
 		option(cucumber_cpp_runner_ENABLE_CPPCHECK "Enable cpp-check analysis" ON)
+		option(cucumber_cpp_runner_ENABLE_INCLUDE_WHAT_YOU_USE "Enable include-what-you-use analysis" ON)
 		option(cucumber_cpp_runner_ENABLE_PCH "Enable precompiled headers" OFF)
 		option(cucumber_cpp_runner_ENABLE_CACHE "Enable ccache" ON)
 	endif ()
@@ -73,6 +78,7 @@ macro(cucumber_cpp_runner_setup_options)
 			cucumber_cpp_runner_ENABLE_UNITY_BUILD
 			cucumber_cpp_runner_ENABLE_CLANG_TIDY
 			cucumber_cpp_runner_ENABLE_CPPCHECK
+			cucumber_cpp_runner_ENABLE_INCLUDE_WHAT_YOU_USE
 			cucumber_cpp_runner_ENABLE_COVERAGE
 			cucumber_cpp_runner_ENABLE_PCH
 			cucumber_cpp_runner_ENABLE_CACHE)
@@ -84,9 +90,6 @@ macro(cucumber_cpp_runner_setup_options)
 	else ()
 		set(DEFAULT_FUZZER OFF)
 	endif ()
-
-	option(cucumber_cpp_runner_BUILD_FUZZ_TESTS "Enable fuzz testing executable" ${DEFAULT_FUZZER})
-
 endmacro()
 
 macro(cucumber_cpp_runner_global_options)
@@ -168,6 +171,10 @@ macro(cucumber_cpp_runner_local_options)
 	if (cucumber_cpp_runner_ENABLE_CPPCHECK)
 		cucumber_cpp_runner_enable_cppcheck(${cucumber_cpp_runner_WARNINGS_AS_ERRORS} "" # override cppcheck options
 		)
+	endif ()
+
+	if (cucumber_cpp_runner_ENABLE_INCLUDE_WHAT_YOU_USE)
+		cucumber_cpp_runner_enable_include_what_you_use()
 	endif ()
 
 	if (cucumber_cpp_runner_ENABLE_COVERAGE)

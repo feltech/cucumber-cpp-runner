@@ -1,61 +1,40 @@
 cmake_minimum_required(VERSION 3.21)
 
-# This template attempts to be "fetch_content"-able
-# so that it works well with tools like CPM or other
-# manual dependency management
-
 # Only set the cxx_standard if it is not set by someone else
 if (NOT DEFINED CMAKE_CXX_STANDARD)
-	set(CMAKE_CXX_STANDARD 20)
+	set(CMAKE_CXX_STANDARD 17)
 endif ()
 
 # strongly encouraged to enable this globally to avoid conflicts between
 # -Wpedantic being enabled and -std=c++20 and -std=gnu++20 for example
 # when compiling with PCH enabled
-set(CMAKE_CXX_EXTENSIONS OFF)
+if (NOT DEFINED CMAKE_CXX_EXTENSIONS)
+	set(CMAKE_CXX_EXTENSIONS OFF)
+endif ()
 
 # Set the project name and language
 project(
 	cucumber_cpp_runner
-	VERSION 0.0.1
+	VERSION 1.0.0
 	DESCRIPTION ""
-	HOMEPAGE_URL "https://github.com/feltech/cucumber-cpp-runner"
+	HOMEPAGE_URL "https://github.com/feltech/cucumber_cpp_runner"
 	LANGUAGES CXX C)
 
 include(cmake/PreventInSourceBuilds.cmake)
 include(ProjectOptions.cmake)
 
-
 cucumber_cpp_runner_setup_options()
-
 cucumber_cpp_runner_global_options()
 include(Dependencies.cmake)
 cucumber_cpp_runner_setup_dependencies()
-
 cucumber_cpp_runner_local_options()
 
-# don't know if this should be set globally from here or not...
-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-
-set(GIT_SHA
-	"Unknown"
-	CACHE STRING "SHA this build was generated from")
-string(
-	SUBSTRING "${GIT_SHA}"
-	0
-	8
-	GIT_SHORT_SHA)
-
 target_compile_features(cucumber_cpp_runner_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
-
 add_library(cucumber_cpp_runner::cucumber_cpp_runner_options ALIAS cucumber_cpp_runner_options)
 add_library(cucumber_cpp_runner::cucumber_cpp_runner_warnings ALIAS cucumber_cpp_runner_warnings)
 
 #add_library(cucumber_cpp_runner::cucumber_cpp_runner_options INTERFACE IMPORTED)
 #add_library(cucumber_cpp_runner::cucumber_cpp_runner_warnings INTERFACE IMPORTED)
-
-# configure files based on CMake configuration options
-add_subdirectory(configured_files)
 
 # Adding the src:
 add_subdirectory(src)
@@ -65,22 +44,11 @@ if (NOT PROJECT_IS_TOP_LEVEL)
 	return()
 endif ()
 
-# Adding the tests:
-include(CTest)
-
-if (BUILD_TESTING)
-	message(AUTHOR_WARNING "Building Tests. Be sure to check out test/constexpr_tests.cpp for constexpr testing")
-	add_subdirectory(test)
-endif ()
-
-
-if (cucumber_cpp_runner_BUILD_FUZZ_TESTS)
-	message(AUTHOR_WARNING "Building Fuzz Tests, using fuzzing sanitizer https://www.llvm.org/docs/LibFuzzer.html")
-	if (NOT cucumber_cpp_runner_ENABLE_ADDRESS_SANITIZER AND NOT cucumber_cpp_runner_ENABLE_THREAD_SANITIZER)
-		message(WARNING "You need asan or tsan enabled for meaningful fuzz testing")
+if (cucumber_cpp_runner_ENABLE_TESTS)
+	message(STATUS "Enabling test targets")
+	if (BUILD_TESTING)
+		add_subdirectory(test)
 	endif ()
-	add_subdirectory(fuzz_test)
-
 endif ()
 
 # If MSVC is being used, and ASAN is enabled, we need to set the debugger environment
@@ -104,12 +72,12 @@ include(cmake/PackageProject.cmake)
 # we know we want to ship
 cucumber_cpp_runner_package_project(
 	TARGETS
-	intro
+	cucumber_cpp_runner
 	cucumber_cpp_runner_options
 	cucumber_cpp_runner_warnings
-	# FIXME: this does not work! CK
-	# PRIVATE_DEPENDENCIES_CONFIGURED project_options project_warnings
 )
+
+# TODO(DF): compute GIT_SHORT_SHA
 
 # Experience shows that explicit package naming can help make it easier to sort
 # out potential ABI related issues before they start, while helping you
@@ -117,5 +85,6 @@ cucumber_cpp_runner_package_project(
 set(CPACK_PACKAGE_FILE_NAME
 	"${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${GIT_SHORT_SHA}-${CMAKE_SYSTEM_NAME}-${CMAKE_BUILD_TYPE}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}"
 )
+message(STATUS "CPack package file name: '${CPACK_PACKAGE_FILE_NAME}'")
 
 include(CPack)

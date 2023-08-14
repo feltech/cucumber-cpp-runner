@@ -75,9 +75,7 @@ jobs:
           vcpkg: false
           ccache: true
           clangtidy: false
-
           cppcheck: false
-
           gcovr: false
           opencppcoverage: false
 
