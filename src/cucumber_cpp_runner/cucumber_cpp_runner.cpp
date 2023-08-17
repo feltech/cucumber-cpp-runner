@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
+#include <utility>
 
 #include <boost/process.hpp>
 #include <boost/program_options.hpp>
@@ -56,71 +57,24 @@ struct UnixSocketServer : cucumber::internal::UnixSocketServer, SocketServerStop
 
 /**
  * Encapsulate the construction of a Cucumber Wire Protocol server via CucumberCpp.
- */
-struct WireServer
-{
-	std::string host;
-	int port;
-	std::string unix_path;
-	bool verbose;
-
-	cucumber::internal::CukeEngineImpl cuke_engine{};
-	cucumber::internal::JsonSpiritWireMessageCodec wire_codec{};
-	cucumber::internal::WireProtocolHandler protocol_handler{wire_codec, cuke_engine};
-
-	std::unique_ptr<cucumber::internal::SocketServer> socket_server =
-		[&]() -> std::unique_ptr<cucumber::internal::SocketServer>
-	{
-		std::unique_ptr<cucumber::internal::SocketServer> server;
-		if (!unix_path.empty())
-		{
-			auto unix_server = std::make_unique<UnixSocketServer>(&protocol_handler);
-			unix_server->listen(unix_path);
-			if (verbose)
-				std::clog << "Listening on socket " << unix_server->listenEndpoint() << '\n';
-			server = std::move(unix_server);
-		}
-		else
-		{
-			auto tcp_server = std::make_unique<TCPSocketServer>(&protocol_handler);
-			boost::asio::io_service service{};
-			// Use resolver, rather than ip::from_string, in case "localhost" is given.
-			tcp_server->listen(boost::asio::ip::tcp::resolver{service}
-								   // NOLINT(*-default-arguments-calls)
-								   .resolve(host, std::to_string(port))
-								   .begin()
-								   ->endpoint());
-			if (verbose)
-				std::clog << "Listening on " << tcp_server->listenEndpoint() << "\n";
-			server = std::move(tcp_server);
-		}
-		return server;
-	}();
-};
-
-/**
+ *
  * Synchronously open socket for connections, then asynchronously process them.
  *
  * This means when we run cucumber, there will be a server to connect to, even if the
  * connections are not yet being serviced, resolving the race condition.
  */
-struct WireServerThread
+struct WireServer
 {
-	WireServerThread(std::string host, int const port, std::string unix_path, bool const verbose)
-		: server_{new WireServer{std::move(host), port, std::move(unix_path), verbose}},
-		  request_{std::async(std::launch::async, [this] { server_->socket_server->acceptOnce(); })}
+	WireServer(std::string host, int port, std::string unix_path, bool verbose)
+		: host_(std::move(host)), port_(port), unix_path_(std::move(unix_path)), verbose_(verbose)
 	{
 	}
-	WireServerThread(WireServerThread &&) = default;
-	WireServerThread & operator=(WireServerThread &&) = delete;
-	WireServerThread(WireServerThread const &) = delete;
-	WireServerThread & operator=(WireServerThread const &) = delete;
-	~WireServerThread()
+	~WireServer()
 	{
 		if (request_.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready)
 			try
 			{
-				dynamic_cast<SocketServerStopInterface &>(*server_->socket_server).stop();
+				dynamic_cast<SocketServerStopInterface &>(*socket_server_).stop();
 			}
 			catch (std::exception const & exc)
 			{
@@ -128,9 +82,53 @@ struct WireServerThread
 			}
 	}
 
+	WireServer() = delete;
+	WireServer(WireServer &&) = delete;
+	WireServer & operator=(WireServer &&) = delete;
+	WireServer(WireServer const &) = delete;
+	WireServer & operator=(WireServer const &) = delete;
+
 private:
-	std::unique_ptr<WireServer> server_;
-	std::future<void> request_;
+	std::string host_;
+	int port_;
+	std::string unix_path_;
+	bool verbose_;
+
+	cucumber::internal::CukeEngineImpl cuke_engine_{};
+	cucumber::internal::JsonSpiritWireMessageCodec wire_codec_{};
+	cucumber::internal::WireProtocolHandler protocol_handler_{wire_codec_, cuke_engine_};
+
+	std::unique_ptr<cucumber::internal::SocketServer> socket_server_ =
+		[&]() -> std::unique_ptr<cucumber::internal::SocketServer>
+	{
+		std::unique_ptr<cucumber::internal::SocketServer> server;
+		if (!unix_path_.empty())
+		{
+			auto unix_server = std::make_unique<UnixSocketServer>(&protocol_handler_);
+			unix_server->listen(unix_path_);
+			if (verbose_)
+				std::clog << "Listening on socket " << unix_server->listenEndpoint() << '\n';
+			server = std::move(unix_server);
+		}
+		else
+		{
+			auto tcp_server = std::make_unique<TCPSocketServer>(&protocol_handler_);
+			boost::asio::io_service service{};
+			// Use resolver, rather than ip::from_string, in case "localhost" is given.
+			tcp_server->listen(boost::asio::ip::tcp::resolver{service}
+								   // NOLINT(*-default-arguments-calls)
+								   .resolve(host_, std::to_string(port_))
+								   .begin()
+								   ->endpoint());
+			if (verbose_)
+				std::clog << "Listening on " << tcp_server->listenEndpoint() << "\n";
+			server = std::move(tcp_server);
+		}
+		return server;
+	}();
+
+	std::future<void> request_{
+		std::async(std::launch::async, [this] { socket_server_->acceptOnce(); })};
 };
 
 }  // namespace
@@ -267,8 +265,7 @@ int main(int argc, char ** argv)
 
 		boost::filesystem::path const cucumber_exe = cucumber_exe_path();
 
-		WireServerThread const wire_server{
-			std::move(listen_host), port, std::move(unix_path), verbose};
+		WireServer const wire_server{std::move(listen_host), port, std::move(unix_path), verbose};
 
 		int const return_code = run_cucumber(
 			cmd_options["features"].as<std::string>(),
