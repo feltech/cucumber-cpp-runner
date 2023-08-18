@@ -73,6 +73,7 @@ include(cmake/PackageProject.cmake)
 cucumber_cpp_runner_package_project(
 	TARGETS
 	cucumber_cpp_runner
+	cucumber_cpp_runner_nomain
 	cucumber_cpp_runner_options
 	cucumber_cpp_runner_warnings
 )
