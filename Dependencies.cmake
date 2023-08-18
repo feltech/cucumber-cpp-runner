@@ -5,6 +5,16 @@ set(CMAKE_MAP_IMPORTED_CONFIG_RELEASE Release;RelWithDebInfo;Debug)
 set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO RelWithDebInfo;Release;Debug)
 set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG Debug;RelWithDebInfo;Release)
 
+if (NOT DEFINED CMAKE_FIND_PACKAGE_PREFER_CONFIG)
+	set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
+endif ()
+message(STATUS "CMAKE_FIND_PACKAGE_PREFER_CONFIG is ${CMAKE_FIND_PACKAGE_PREFER_CONFIG}")
+
+set(
+	cucumber_cpp_runner_DEPENDENCY_INSTALL_CACHE_DIR ${PROJECT_BINARY_DIR}/_deps/dist
+	CACHE PATH "Location to install any missing dependencies prior to the build process"
+)
+
 function(cucumber_cpp_runner_cpm_install_package)
 	cmake_parse_arguments(
 		PARSE_ARGV 0
@@ -13,11 +23,7 @@ function(cucumber_cpp_runner_cpm_install_package)
 		"NAME;GIT_TAG;GITHUB_REPOSITORY;FIND_PACKAGE_IS_FOUND_VAR_TO_CHECK"
 		"FIND_PACKAGE_OPTIONS;CMAKE_OPTIONS"
 	)
-	
-	set(
-		cucumber_cpp_runner_DEPENDENCY_INSTALL_CACHE_DIR ${PROJECT_BINARY_DIR}/_deps/dist 
-		CACHE PATH "Location to install any missing dependencies prior to the build process"
-	)
+
 	list(APPEND CMAKE_PREFIX_PATH ${cucumber_cpp_runner_DEPENDENCY_INSTALL_CACHE_DIR})
 
 	CPMAddPackage(
@@ -30,11 +36,10 @@ function(cucumber_cpp_runner_cpm_install_package)
 	)
 
 	find_package(
-		${args_NAME} CONFIG
+		${args_NAME}
 		PATHS ${cucumber_cpp_runner_DEPENDENCY_INSTALL_CACHE_DIR}
 		${args_FIND_PACKAGE_OPTIONS}
 	)
-	
 	if (NOT DEFINED ${args_NAME}_CONFIG)
 		message(STATUS "${args_NAME} not found, downloading...")
 
@@ -53,10 +58,10 @@ function(cucumber_cpp_runner_cpm_install_package)
 			# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105329 (affects Cucumber-Cpp)
 			-DCMAKE_CXX_FLAGS="-Wno-restrict"
 			#			-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
-			#			-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+			-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
 			#			-DCMAKE_CXX_EXTENSIONS=${CMAKE_CXX_EXTENSIONS}
 			#			-DCMAKE_CXX_STANDARD_REQUIRED=${CMAKE_CXX_STANDARD_REQUIRED}
-			-DCMAKE_PREFIX_PATH="${CMAKE_PREFIX_PATH}"
+			"-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
 			-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=TRUE
 			# Allow `PackageName_ROOT` hint for find_package calls.
 			-DCMAKE_POLICY_DEFAULT_CMP0074=NEW
@@ -70,30 +75,37 @@ function(cucumber_cpp_runner_cpm_install_package)
 		)
 		execute_process(
 			COMMAND ${CMAKE_COMMAND}
-			--install ${${args_NAME}_BINARY_DIR} 
+			--install ${${args_NAME}_BINARY_DIR}
 			--prefix ${cucumber_cpp_runner_DEPENDENCY_INSTALL_CACHE_DIR}
 			COMMAND_ERROR_IS_FATAL ANY
 		)
+		find_package(
+			${args_NAME} CONFIG REQUIRED
+			PATHS ${cucumber_cpp_runner_DEPENDENCY_INSTALL_CACHE_DIR}
+			${args_FIND_PACKAGE_OPTIONS}
+		)
 	endif ()
-	find_package(
-		${args_NAME} CONFIG REQUIRED 
-		PATHS ${cucumber_cpp_runner_DEPENDENCY_INSTALL_CACHE_DIR} 
-		${args_FIND_PACKAGE_OPTIONS}
-	)
 endfunction()
 
 
 # Done as a function so that updates to variables like
 # CMAKE_CXX_FLAGS don't propagate out to other
 # targets
+# For each dependency, see if it's
+# already been provided to us by a parent project
 function(cucumber_cpp_runner_setup_dependencies)
 
 	# A bit heavyweight to bring in through CPM - so require external provision.
 	find_package(Boost REQUIRED)
 
-	# For each dependency, see if it's
-	# already been provided to us by a parent project
-	if (NOT TARGET CucumberCpp::cucumber-cpp-nomain)
+	if (NOT TARGET yaml-cpp::yaml-cpp)
+		cucumber_cpp_runner_cpm_install_package(
+			NAME GTest
+			GITHUB_REPOSITORY google/googletest
+			GIT_TAG v1.14.0
+		)
+	endif ()
+	if (NOT TARGET CucumberCpp::cucumber-cpp)
 		cucumber_cpp_runner_cpm_install_package(
 			NAME CucumberCpp
 			GITHUB_REPOSITORY cucumber/cucumber-cpp
@@ -127,4 +139,5 @@ function(cucumber_cpp_runner_setup_dependencies)
 			GIT_TAG 0.8.0
 		)
 	endif ()
+
 endfunction()
