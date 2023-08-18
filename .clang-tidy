@@ -30,6 +30,11 @@ WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
 FormatStyle: file
 CheckOptions:
+  # Allow breaking rule of 5 when only special function is a defaulted destructor.
+  - key:             hicpp-special-member-functions.AllowSoleDefaultDtor
+    value:           true
+  - key:             cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
+    value:           true
   - key:             readability-identifier-naming.ClassCase
     value:           CamelCase
   - key:             readability-identifier-naming.ClassMemberCase

@@ -27,7 +27,7 @@ constexpr int kExitFailure = EXIT_FAILURE;
 constexpr unsigned kCmdHelpTextWidth = 80;
 constexpr unsigned kCucumberTimeoutMs = 10000;
 
-struct SocketServerStopInterface  // NOLINT(*-special-member-functions)
+struct SocketServerStopInterface
 {
 	virtual void stop() = 0;
 	virtual ~SocketServerStopInterface() = default;
@@ -100,8 +100,7 @@ private:
 	cucumber::internal::JsonSpiritWireMessageCodec wire_codec_{};
 	cucumber::internal::WireProtocolHandler protocol_handler_{wire_codec_, cuke_engine_};
 
-	std::unique_ptr<cucumber::internal::SocketServer> socket_server_ =
-		[&]() -> std::unique_ptr<cucumber::internal::SocketServer>
+	std::unique_ptr<cucumber::internal::SocketServer> socket_server_ = [&]
 	{
 		std::unique_ptr<cucumber::internal::SocketServer> server;
 		if (!unix_path_.empty())
