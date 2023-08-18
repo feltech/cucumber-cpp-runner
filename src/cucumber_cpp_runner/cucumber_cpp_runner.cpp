@@ -17,6 +17,8 @@
 #include <fmt/format.h>
 #include <yaml-cpp/yaml.h>
 
+namespace fs = boost::filesystem;
+
 namespace
 {
 // Silence clang-tidy readability-magic-numbers, which doesn't like macros.
@@ -133,19 +135,11 @@ private:
 
 }  // namespace
 
-boost::filesystem::path cucumber_exe_path()
-{
-	boost::filesystem::path path = boost::process::search_path("cucumber");
-	//	if (path.empty())
-	//		throw std::runtime_error{"'cucumber' executable not found"};
-	return path;
-}
-
 /**
  * Launch a subprocess to execute `cucumber` command line.
  */
-int run_cucumber(
-	std::string const & feature_dir,
+int run_cucumber_exe(
+	fs::path const & feature_path,
 	std::string const & cucumber_exe,
 	std::string const & cucumber_options,
 	bool const verbose)
@@ -155,7 +149,7 @@ int run_cucumber(
 	bp::ipstream cucumber_stdout;
 
 	std::string const cucumber_cmd =
-		fmt::format("{} {} {}", cucumber_exe, cucumber_options, feature_dir);
+		fmt::format("{} {} {}", cucumber_exe, cucumber_options, feature_path.string());
 
 	if (verbose)
 		fmt::print(stderr, "Executing '{}'\n", cucumber_cmd);
@@ -196,6 +190,94 @@ int run_cucumber(
 	return exit_code;
 }
 
+fs::path find_cucumber_exe(fs::path const & cucumber_exe)
+{
+	fs::path path = boost::process::search_path(cucumber_exe);
+	if (path.empty())
+		throw std::runtime_error{"'cucumber' executable not found"};
+	return path;
+}
+
+fs::path find_wire_config(fs::path const & feature_path)
+{
+	for (fs::directory_entry const & entry : fs::recursive_directory_iterator(feature_path))
+	{
+		if (fs::is_directory(entry))
+			continue;
+
+		fs::path file_path;
+		if (fs::is_symlink(entry))
+			file_path = fs::read_symlink(entry);
+		else
+			file_path = entry.path();
+
+		if (!fs::is_regular_file(file_path))
+			continue;
+
+		if (file_path.extension() != ".wire")
+			continue;
+
+		return file_path;
+	}
+	throw std::invalid_argument{
+		fmt::format(".wire file not found in directory tree {}", feature_path.string())};
+}
+
+std::tuple<std::string, int, std::string> parse_wire_config(fs::path const & wire_config_path)
+{
+	std::string host;
+	int port{};
+	std::string unix_path;
+
+	std::string yaml;
+	fs::load_string_file(wire_config_path, yaml);
+	auto config = YAML::Load(yaml);
+
+	if (config["unix"].IsDefined())
+		unix_path = config["unix"].as<std::string>();
+
+	if (config["host"].IsDefined())
+	{
+		if (!unix_path.empty())
+			throw std::invalid_argument{fmt::format(
+				"Both unix path '{}' and TCP host {}:{} defined. Only one is supported.",
+				unix_path,
+				host,
+				port)};
+		host = config["host"].as<std::string>();
+		port = config["port"].as<int>();
+	}
+
+#ifndef BOOST_ASIO_HAS_LOCAL_SOCKETS
+	if (!unix_path.empty())
+		throw std::invalid_argument{
+			fmt::print(stderr, "Unix paths are unsupported on this system: '{}'", unix_path)};
+#endif
+
+	return {std::move(host), port, std::move(unix_path)};
+}
+
+struct CucumberRunnerParams
+{
+	fs::path cucumber_exe{"cucumber"};
+	std::string cucumber_options{};
+	fs::path feature_path{"."};
+	bool verbose{false};
+};
+
+int execute_cucumber_tests(const CucumberRunnerParams & params = {})
+{
+	// Locate now so we can error out early if not found.
+	fs::path const cucumber_exe_path = find_cucumber_exe(params.feature_path);
+
+	auto [host, port, unix_path] = parse_wire_config(find_wire_config(params.feature_path));
+
+	WireServer const wire_server{std::move(host), port, std::move(unix_path), params.verbose};
+
+	return run_cucumber_exe(
+		params.feature_path, cucumber_exe_path.string(), params.cucumber_options, params.verbose);
+}
+
 int main(int argc, char ** argv)
 {
 	// Ensure ctest, etc, output doesn't get interleaved.
@@ -206,15 +288,12 @@ int main(int argc, char ** argv)
 
 	cmd_options_desc.add_options()("help,h", "help for cucumber-cpp")(
 		"verbose,v", "verbose output")(
-		"config,c",
-		value<std::string>()->default_value("step_definitions/cucumber.wire"),
-		"location of .wire config file")(
-		"features,f",
-		value<std::string>()->default_value("."),
-		"location of feature file or directory")(
+		"features,f", value<std::string>()->default_value("."), "location of feature file(s)")(
+		"cucumber,c", value<std::string>()->default_value("cucumber"), "cucumber executable")(
 		"options,o",
 		value<std::string>()->default_value(""),
 		"additional cucumber options (surround in quotes for multiple)");
+
 	boost::program_options::variables_map cmd_options;
 	boost::program_options::store(
 		boost::program_options::parse_command_line(argc, argv, cmd_options_desc), cmd_options);
@@ -226,54 +305,13 @@ int main(int argc, char ** argv)
 		return kExitSuccess;
 	}
 
-	if (!boost::filesystem::exists(cmd_options["config"].as<std::string>()))
-	{
-		fmt::print(
-			stderr, "Wire config not found at '{}'", cmd_options["config"].as<std::string>());
-		return kExitFailure;
-	}
-
-	std::string listen_host;
-	int port{};
-	std::string unix_path;
-
-	std::string yaml;
-	boost::filesystem::load_string_file(cmd_options["config"].as<std::string>(), yaml);
-	auto config = YAML::Load(yaml);
-
 	try
 	{
-		if (config["unix"].IsDefined())
-		{
-			unix_path = config["unix"].as<std::string>();
-		}
-		else if (config["host"].IsDefined())
-		{
-			listen_host = config["host"].as<std::string>();
-			port = config["port"].as<int>();
-		}
-
-#ifndef BOOST_ASIO_HAS_LOCAL_SOCKETS
-		if (!unixPath.empty())
-		{
-			fmt::print(stderr, "Unix paths are unsupported on this system: '{}'", unixPath);
-			return exit_failure;
-		}
-#endif
-
-		bool const verbose = cmd_options.count("verbose") != 0U;
-
-		boost::filesystem::path const cucumber_exe = cucumber_exe_path();
-
-		WireServer const wire_server{std::move(listen_host), port, std::move(unix_path), verbose};
-
-		int const return_code = run_cucumber(
-			cmd_options["features"].as<std::string>(),
-			cucumber_exe.string(),
-			cmd_options["options"].as<std::string>(),
-			verbose);
-
-		return return_code;
+		return execute_cucumber_tests(
+			{cmd_options["cucumber"].as<std::string>(),
+			 cmd_options["options"].as<std::string>(),
+			 cmd_options["features"].as<std::string>(),
+			 cmd_options["verbose"].as<bool>()});
 	}
 	catch (std::exception & e)
 	{
