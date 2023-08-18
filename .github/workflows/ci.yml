@@ -140,7 +140,6 @@ jobs:
         with:
           envFile: '.github/constants.env'
 
-
       - name: Setup Cpp
         uses: aminya/setup-cpp@v1
         with:
@@ -149,16 +148,37 @@ jobs:
 
           cmake: true
           ninja: true
-          vcpkg: false
+          conan: 1.59
           ccache: true
           clangtidy: ${{ env.CLANG_TIDY_VERSION }}
           cppcheck: true
           gcovr: true
           opencppcoverage: true
 
-      - name: Configure CMake
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.7.2'
+
+      - name: Linux - GCC - Set Conan libstdc++ C++11 ABI
+        if: runner.os == 'Linux' && matrix.compiler == 'gcc-11'
         run: |
-          cmake -S . -B ./build -G "${{matrix.generator}}" -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{matrix.enable_ipo }} -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}} -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=${{matrix.packaging_maintainer_mode}} -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=${{ matrix.build_type == 'Debug' }} -DGIT_SHA:STRING=${{ github.sha }}
+          conan profile update settings.compiler.libcxx=libstdc++11 default
+
+      - name: Install external dependencies
+        run: |
+          bundler install
+          conan install -if .conan .
+
+      - name: Configure CMake
+        run: >
+          cmake -S . -B ./build -G "${{matrix.generator}}" 
+          -DCMAKE_PREFIX_PATH=.conan 
+          -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{matrix.enable_ipo }} 
+          -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}} 
+          -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=${{matrix.packaging_maintainer_mode}} 
+          -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=${{ matrix.build_type == 'Debug' }} 
+          -DGIT_SHA:STRING=${{ github.sha }}
 
       - name: Build
         # Execute the build.  You can specify a specific target with "--target <NAME>"
