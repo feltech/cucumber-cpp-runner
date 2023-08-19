@@ -44,7 +44,7 @@ int main(int argc, char ** argv)
 			{cmd_options["cucumber"].as<std::string>(),
 			 cmd_options["options"].as<std::string>(),
 			 cmd_options["features"].as<std::string>(),
-			 cmd_options["verbose"].as<bool>()});
+			 static_cast<bool>(cmd_options.count("verbose"))});
 	}
 	catch (std::exception & e)
 	{
