@@ -30,6 +30,9 @@ WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
 FormatStyle: file
 CheckOptions:
+  # Allow ALL_CAPS macros used as constants. Otherwise auto-generated export header is caught.
+  - key:             cppcoreguidelines-macro-usage.CheckCapsOnly
+    value:           true
   # Allow breaking rule of 5 when only special function is a defaulted destructor.
   - key:             hicpp-special-member-functions.AllowSoleDefaultDtor
     value:           true
