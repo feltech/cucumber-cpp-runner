@@ -45,10 +45,9 @@ if (NOT PROJECT_IS_TOP_LEVEL)
 endif ()
 
 if (cucumber_cpp_runner_ENABLE_TESTS)
+	enable_testing()
 	message(STATUS "Enabling test targets")
-	if (BUILD_TESTING)
-		add_subdirectory(test)
-	endif ()
+	add_subdirectory(test)
 endif ()
 
 # If MSVC is being used, and ASAN is enabled, we need to set the debugger environment
