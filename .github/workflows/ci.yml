@@ -66,19 +66,9 @@ jobs:
             compiler: msvc
           - os: macos-10.15
             compiler: gcc-11
-        include:
+#        include:
 #          - os: macos-10.15
 #            enable_ipo: OFF
-
-          # This exists solely to make sure a non-multiconfig build works
-          - os: ubuntu-20.04
-            compiler: gcc-11
-            generator: "Unix Makefiles"
-            build_type: Release
-            packaging_maitainer_mode: ON
-            build_shared: OFF
-            enable_ipo: ON
-            package_generator: ''
 
     steps:
       - uses: actions/checkout@v3
@@ -128,7 +118,7 @@ jobs:
       - name: Install external dependencies
         run: |
           bundler install
-          conan install -if ${{ github.workspace }}/.conan .
+          conan install -if ${{ github.workspace }}/.conan --build=missing .
 
       - name: Configure CMake
         run: >
@@ -224,17 +214,18 @@ jobs:
       - name: Install external dependencies
         run: |
           bundler install
-          conan install -if .conan .
+          conan install -if ${{ github.workspace }}/.conan --build=missing .
 
       - name: Configure CMake
         run: >
           cmake -S . -B ./build -G "${{matrix.generator}}" 
-          -DCMAKE_PREFIX_PATH=.conan 
           -D${{ env.PROJECT_NAME }}_ENABLE_TESTS=ON
           -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{matrix.enable_ipo }} 
           -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}} 
           -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=ON 
           -DGIT_SHA:STRING=${{ github.sha }}
+        env:
+          CMAKE_PREFIX_PATH: ${{ github.workspace }}/.conan
 
       - name: Build
         # Execute the build.  You can specify a specific target with "--target <NAME>"

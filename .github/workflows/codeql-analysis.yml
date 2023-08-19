@@ -91,7 +91,7 @@ jobs:
 
       - name: Install external dependencies
         run: |
-          conan install -if ${{ github.workspace }}/.conan .
+          conan install -if ${{ github.workspace }}/.conan --build=missing .
 
         # make sure coverage is only enabled for Debug builds, since it sets -O0 to make sure coverage
         # has meaningful results
