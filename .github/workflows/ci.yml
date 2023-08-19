@@ -10,7 +10,7 @@ on:
       - develop
 
 env:
-  CLANG_TIDY_VERSION: "15.0.2"
+  CLANG_TIDY_VERSION: "16.0.6"
   VERBOSE: 1
 
 concurrency:
@@ -39,95 +39,48 @@ jobs:
           # you can specify the version after `-` like "llvm-15.0.2".
           - llvm-15.0.2
           - gcc-11
+          - msvc
         generator:
           - "Ninja Multi-Config"
         build_type:
           - Release
-          - Debug
         packaging_maintainer_mode:
           - ON
-          - OFF
         build_shared:
+          - ON
           - OFF
+        enable_ipo:
+          - ON
+        package_generator:
+          - TGZ
 
         exclude:
           # mingw is determined by this author to be too buggy to support
           - os: windows-2019
             compiler: gcc-11
-
-        include:
-          # Add appropriate variables for gcov version required. This will intentionally break
-          # if you try to use a compiler that does not have gcov set
-          - compiler: gcc-11
-            gcov_executable: gcov
-            enable_ipo: On
-
-          - compiler: llvm-15.0.2
-            enable_ipo: Off
-            gcov_executable: "llvm-cov gcov"
-
+          - os: windows-2019
+            compiler: llvm-15.0.2
+          - os: ubuntu-20.04
+            compiler: msvc
           - os: macos-10.15
-            enable_ipo: Off
-
-          # Set up preferred package generators, for given build configurations
-          - build_type: Release
-            packaging_maintainer_mode: OFF
-            package_generator: TBZ2
+            compiler: msvc
+          - os: macos-10.15
+            compiler: gcc-11
+        include:
+#          - os: macos-10.15
+#            enable_ipo: OFF
 
           # This exists solely to make sure a non-multiconfig build works
           - os: ubuntu-20.04
             compiler: gcc-11
             generator: "Unix Makefiles"
-            build_type: Debug
-            gcov_executable: gcov
-            packaging_maintainer_mode: On
-            enable_ipo: Off
-
-          # Windows msvc builds
-          - os: windows-2022
-            compiler: msvc
-            generator: "Visual Studio 17 2022"
-            build_type: Debug
-            packaging_maintainer_mode: On
-            enable_ipo: On
-
-          - os: windows-2022
-            compiler: msvc
-            generator: "Visual Studio 17 2022"
             build_type: Release
-            packaging_maintainer_mode: On
-            enable_ipo: On
-
-          - os: windows-2022
-            compiler: msvc
-            generator: "Visual Studio 17 2022"
-            build_type: Debug
-            packaging_maintainer_mode: Off
-
-          - os: windows-2022
-            compiler: msvc
-            generator: "Visual Studio 17 2022"
-            build_type: Release
-            packaging_maintainer_mode: Off
-            package_generator: ZIP
-
-          - os: windows-2022
-            compiler: msvc
-            generator: "Visual Studio 17 2022"
-            build_type: Release
-            packaging_maintainer_mode: On
-            enable_ipo: On
-            build_shared: On
-
+            packaging_maitainer_mode: ON
+            build_shared: OFF
+            enable_ipo: ON
+            package_generator: ''
 
     steps:
-      - name: Check for llvm version mismatches
-        if: ${{ contains(matrix.compiler, 'llvm') && !contains(matrix.compiler, env.CLANG_TIDY_VERSION) }}
-        uses: actions/github-script@v3
-        with:
-          script: |
-            core.setFailed('There is a mismatch between configured llvm compiler and clang-tidy version chosen')
-
       - uses: actions/checkout@v3
 
       - name: Setup Cache
@@ -153,10 +106,10 @@ jobs:
           ninja: true
           conan: 1.59
           ccache: true
-          clangtidy: ${{ env.CLANG_TIDY_VERSION }}
-          cppcheck: true
-          gcovr: true
-          opencppcoverage: true
+          clangtidy: false
+          cppcheck: false
+          gcovr: false
+          opencppcoverage: false
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -181,31 +134,21 @@ jobs:
         run: >
           cmake -S . -B ./build -G "${{matrix.generator}}" 
           -DCMAKE_PREFIX_PATH=.conan 
+          -D${{ env.PROJECT_NAME }}_ENABLE_TESTS=ON
           -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{matrix.enable_ipo }} 
           -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}} 
           -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=${{matrix.packaging_maintainer_mode}} 
-          -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=${{ matrix.build_type == 'Debug' }} 
           -DGIT_SHA:STRING=${{ github.sha }}
 
       - name: Build
         # Execute the build.  You can specify a specific target with "--target <NAME>"
         run: |
-          cmake --build ./build --config ${{matrix.build_type}}
+          cmake --build ./build --config ${{matrix.build_type}} --parallel
 
       - name: Unix - Test and coverage
-        if: runner.os != 'Windows'
         working-directory: ./build
-        # Execute tests defined by the CMake configuration.
-        # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
         run: |
           ctest -C ${{matrix.build_type}}
-          gcovr -j ${{env.nproc}} --delete --root ../ --print-summary --xml-pretty --xml coverage.xml . --gcov-executable '${{ matrix.gcov_executable }}'
-
-      - name: Windows - Test and coverage
-        if: runner.os == 'Windows'
-        working-directory: ./build
-        run: |
-          OpenCppCoverage.exe --export_type cobertura:coverage.xml --cover_children -- ctest -C ${{matrix.build_type}}
 
       - name: CPack
         if: matrix.package_generator != ''
@@ -220,6 +163,87 @@ jobs:
           files: |
             build/*-*${{ matrix.build_type }}*-*.*
 
+  Lint:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: ubuntu-20.04
+            compiler: gcc-11
+            generator: "Unix Makefiles"
+            build_type: Debug
+            packaging_maintainer_mode: OFF
+            build_shared: ON
+            enable_ipo: OFF
+            gcov_executable: gcov
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Cache
+        uses: ./.github/actions/setup_cache
+        with:
+          compiler: ${{ matrix.compiler }}
+          build_type: ${{ matrix.build_type }}
+          packaging_maintainer_mode: ${{ matrix.packaging_maintainer_mode }}
+          generator: ${{ matrix.generator }}
+
+      - name: Project Name
+        uses: cardinalby/export-env-action@v2
+        with:
+          envFile: '.github/constants.env'
+
+      - name: Setup Cpp
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: ${{ matrix.compiler }}
+          cmake: true
+          ninja: true
+          conan: 1.59
+          ccache: true
+          clangtidy: ${{ env.CLANG_TIDY_VERSION }}
+          cppcheck: true
+          gcovr: true
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.7.2'
+
+      - name: Initialise conan profile
+        run: |
+          conan profile new default --detect
+
+      - name: Linux - GCC - Set Conan libstdc++ C++11 ABI
+        run: |
+          conan profile update settings.compiler.libcxx=libstdc++11 default
+
+      - name: Install external dependencies
+        run: |
+          bundler install
+          conan install -if .conan .
+
+      - name: Configure CMake
+        run: >
+          cmake -S . -B ./build -G "${{matrix.generator}}" 
+          -DCMAKE_PREFIX_PATH=.conan 
+          -D${{ env.PROJECT_NAME }}_ENABLE_TESTS=ON
+          -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{matrix.enable_ipo }} 
+          -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}} 
+          -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=ON 
+          -DGIT_SHA:STRING=${{ github.sha }}
+
+      - name: Build
+        # Execute the build.  You can specify a specific target with "--target <NAME>"
+        run: |
+          cmake --build ./build --config ${{matrix.build_type}} --parallel
+
+      - name: Test and coverage
+        working-directory: ./build
+        run: |
+          ctest -C ${{matrix.build_type}}
+          gcovr -j ${{env.nproc}} --delete --root ../ --print-summary --xml-pretty --xml coverage.xml . --gcov-executable '${{ matrix.gcov_executable }}'
 
       - name: Publish to codecov
         uses: codecov/codecov-action@v2
