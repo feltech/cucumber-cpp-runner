@@ -55,8 +55,10 @@ function(cucumber_cpp_runner_cpm_install_package)
 			--compile-no-warning-as-error
 			-DCMAKE_BUILD_TYPE=${build_type}
 			-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+			# Frustratingly, need to keep a list of warnings to disable, for annoying projects
+			# that force `-Werror` even for consumers (e.g. Cucumber-Cpp)
 			# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105329 (affects Cucumber-Cpp)
-			-DCMAKE_CXX_FLAGS="-Wno-restrict"
+			"-DCMAKE_CXX_FLAGS=-Wno-restrict -Wno-unknown-warning-option"
 			#			-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
 			-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
 			#			-DCMAKE_CXX_EXTENSIONS=${CMAKE_CXX_EXTENSIONS}
