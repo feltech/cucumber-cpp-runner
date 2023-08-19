@@ -176,10 +176,10 @@ jobs:
       - name: Setup Cache
         uses: ./.github/actions/setup_cache
         with:
-          compiler: ${{ matrix.compiler }}
-          build_type: ${{ matrix.build_type }}
-          packaging_maintainer_mode: ${{ matrix.packaging_maintainer_mode }}
-          generator: ${{ matrix.generator }}
+          compiler: ${{ matrix.config.compiler }}
+          build_type: ${{ matrix.config.build_type }}
+          packaging_maintainer_mode: ${{ matrix.config.packaging_maintainer_mode }}
+          generator: ${{ matrix.config.generator }}
 
       - name: Project Name
         uses: cardinalby/export-env-action@v2
@@ -189,7 +189,7 @@ jobs:
       - name: Setup Cpp
         uses: aminya/setup-cpp@v1
         with:
-          compiler: ${{ matrix.compiler }}
+          compiler: ${{ matrix.config.compiler }}
           cmake: true
           ninja: true
           conan: 1.59
@@ -218,10 +218,10 @@ jobs:
 
       - name: Configure CMake
         run: >
-          cmake -S . -B ./build -G "${{matrix.generator}}" 
+          cmake -S . -B ./build -G "${{ matrix.config.generator }}" 
           -D${{ env.PROJECT_NAME }}_ENABLE_TESTS=ON
-          -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{matrix.enable_ipo }} 
-          -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}} 
+          -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{matrix.config.enable_ipo }} 
+          -DCMAKE_BUILD_TYPE:STRING=${{matrix.config.build_type}} 
           -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=ON 
           -DGIT_SHA:STRING=${{ github.sha }}
         env:
@@ -230,13 +230,13 @@ jobs:
       - name: Build
         # Execute the build.  You can specify a specific target with "--target <NAME>"
         run: |
-          cmake --build ./build --config ${{matrix.build_type}} --parallel
+          cmake --build ./build --config ${{matrix.config.build_type}} --parallel
 
       - name: Test and coverage
         working-directory: ./build
         run: |
-          ctest -C ${{matrix.build_type}}
-          gcovr -j ${{env.nproc}} --delete --root ../ --print-summary --xml-pretty --xml coverage.xml . --gcov-executable '${{ matrix.gcov_executable }}'
+          ctest -C ${{matrix.config.build_type}}
+          gcovr -j ${{env.nproc}} --delete --root ../ --print-summary --xml-pretty --xml coverage.xml . --gcov-executable '${{ matrix.config.gcov_executable }}'
 
       - name: Publish to codecov
         uses: codecov/codecov-action@v2
