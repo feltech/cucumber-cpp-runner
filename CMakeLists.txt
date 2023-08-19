@@ -80,8 +80,16 @@ cucumber_cpp_runner_package_project(
 # GIT_SHORT_SHA is provided externally, e.g. by CI build.
 # If not provided, assume a developer build.
 if (NOT DEFINED GIT_SHORT_SHA)
-	set(GIT_SHORT_SHA dev)
-endif()
+	if (DEFINED GIT_SHA)
+		string(
+			SUBSTRING "${GIT_SHA}"
+			0
+			8
+			GIT_SHORT_SHA)
+	else ()
+		set(GIT_SHORT_SHA dev)
+	endif ()
+endif ()
 
 # Experience shows that explicit package naming can help make it easier to sort
 # out potential ABI related issues before they start, while helping you
