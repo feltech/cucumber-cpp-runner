@@ -135,6 +135,11 @@ jobs:
         run: |
           cpack -C ${{matrix.build_type}} -G ${{matrix.package_generator}}
 
+      - uses: actions/upload-artifact@v3
+        with:
+          name: packages
+          path: build/*-*${{ matrix.build_type }}*-*.*
+
       - name: Publish Tagged Release
         uses: softprops/action-gh-release@v1
         if: ${{ startsWith(github.ref, 'refs/tags/') && matrix.package_generator != '' }}
