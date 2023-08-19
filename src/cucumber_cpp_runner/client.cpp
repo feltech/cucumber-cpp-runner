@@ -76,6 +76,8 @@ int run_cucumber_exe(
 
 fs::path find_cucumber_exe(fs::path const & cucumber_exe)
 {
+	// Grr, libstdc++ 12.2/13.1 UBSan-detected bug:
+	//   https://gcc.gnu.org/bugzilla//show_bug.cgi?id=109703
 	fs::path path = boost::process::search_path(cucumber_exe);
 	if (path.empty())
 		throw std::runtime_error{"'cucumber' executable not found"};
