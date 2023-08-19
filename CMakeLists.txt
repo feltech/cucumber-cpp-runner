@@ -86,8 +86,12 @@ endif()
 # Experience shows that explicit package naming can help make it easier to sort
 # out potential ABI related issues before they start, while helping you
 # track a build to a specific GIT SHA
+set(_library_type static)
+if (BUILD_SHARED_LIBS)
+	set(_library_type shared)
+endif ()
 set(CPACK_PACKAGE_FILE_NAME
-	"${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${GIT_SHORT_SHA}-${CMAKE_SYSTEM_NAME}-${CMAKE_BUILD_TYPE}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}"
+	"${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${GIT_SHORT_SHA}-${CMAKE_SYSTEM_NAME}-${CMAKE_BUILD_TYPE}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}-${_library_type}"
 )
 message(STATUS "CPack package file name: '${CPACK_PACKAGE_FILE_NAME}'")
 
