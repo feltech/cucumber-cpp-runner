@@ -95,7 +95,7 @@ jobs:
 
       - name: Initialise conan profile
         run: |
-          conan profile new default --detect
+          conan profile new default --detect --force
 
       - name: Linux - GCC - Set Conan libstdc++ C++11 ABI
         if: runner.os == 'Linux' && matrix.build.compiler == 'gcc-11'
@@ -192,7 +192,7 @@ jobs:
 
       - name: Initialise conan profile
         run: |
-          conan profile new default --detect
+          conan profile new default --detect --force
 
       - name: Linux - GCC - Set Conan libstdc++ C++11 ABI
         run: |
