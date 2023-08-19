@@ -160,6 +160,10 @@ jobs:
         with:
           ruby-version: '2.7.2'
 
+      - name: Initialise conan profile
+        run: |
+          conan profile new default --detect
+
       - name: Linux - GCC - Set Conan libstdc++ C++11 ABI
         if: runner.os == 'Linux' && matrix.compiler == 'gcc-11'
         run: |
