@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   Test:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.build.os }}
     strategy:
       fail-fast: false
 
@@ -31,21 +31,21 @@ jobs:
       # Disable/enable builds in this list to meet the above recommendations
       # and your own projects needs
       matrix:
-        os:
-          - ubuntu-20.04
-          - macos-10.15
-          - windows-2019
-        compiler:
-          # you can specify the version after `-` like "llvm-13".
-          - llvm-13
-          - gcc-11
-          - msvc
-        generator:
-          - "Ninja Multi-Config"
+        build:
+          - os: ubuntu-20.04
+            compiler: gcc-11
+            generator: "Ninja Multi-Config"
+          - os: ubuntu-20.04
+            compiler: llvm-13
+            generator: "Ninja Multi-Config"
+          - os: macos-10.15
+            compiler: llvm-13
+            generator: "Ninja Multi-Config"
+          - os: windows-2019
+            compiler: msvc
+            generator: "Visual Studio 17 2022"
         build_type:
           - Release
-        packaging_maintainer_mode:
-          - ON
         build_shared:
           - ON
           - OFF
@@ -53,19 +53,6 @@ jobs:
           - ON
         package_generator:
           - TGZ
-
-        exclude:
-          # mingw is determined by this author to be too buggy to support
-          - os: windows-2019
-            compiler: gcc-11
-          - os: windows-2019
-            compiler: llvm-13
-          - os: ubuntu-20.04
-            compiler: msvc
-          - os: macos-10.15
-            compiler: msvc
-          - os: macos-10.15
-            compiler: gcc-11
 #        include:
 #          - os: macos-10.15
 #            enable_ipo: OFF
@@ -76,10 +63,10 @@ jobs:
       - name: Setup Cache
         uses: ./.github/actions/setup_cache
         with:
-          compiler: ${{ matrix.compiler }}
+          compiler: ${{ matrix.build.compiler }}
           build_type: ${{ matrix.build_type }}
-          packaging_maintainer_mode: ${{ matrix.packaging_maintainer_mode }}
-          generator: ${{ matrix.generator }}
+          packaging_maintainer_mode: ON
+          generator: ${{ matrix.build.generator }}
 
       - name: Project Name
         uses: cardinalby/export-env-action@v2
@@ -89,8 +76,8 @@ jobs:
       - name: Setup Cpp
         uses: aminya/setup-cpp@v1
         with:
-          compiler: ${{ matrix.compiler }}
-          vcvarsall: ${{ contains(matrix.os, 'windows' )}}
+          compiler: ${{ matrix.build.compiler }}
+          vcvarsall: ${{ contains(matrix.build.os, 'windows' )}}
 
           cmake: true
           ninja: true
@@ -111,7 +98,7 @@ jobs:
           conan profile new default --detect
 
       - name: Linux - GCC - Set Conan libstdc++ C++11 ABI
-        if: runner.os == 'Linux' && matrix.compiler == 'gcc-11'
+        if: runner.os == 'Linux' && matrix.build.compiler == 'gcc-11'
         run: |
           conan profile update settings.compiler.libcxx=libstdc++11 default
 
@@ -122,12 +109,12 @@ jobs:
 
       - name: Configure CMake
         run: >
-          cmake -S . -B ./build -G "${{matrix.generator}}" 
+          cmake -S . -B ./build -G "${{matrix.build.generator}}" 
           -DCMAKE_PREFIX_PATH=.conan 
           -D${{ env.PROJECT_NAME }}_ENABLE_TESTS=ON
           -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{matrix.enable_ipo }} 
           -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}} 
-          -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=${{matrix.packaging_maintainer_mode}} 
+          -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=ON
           -DGIT_SHA:STRING=${{ github.sha }}
         env:
           CMAKE_PREFIX_PATH: ${{ github.workspace }}/.conan
