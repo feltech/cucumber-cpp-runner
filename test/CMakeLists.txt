@@ -27,6 +27,6 @@ target_link_libraries(
 
 add_test(
 	NAME cucumber_cpp_runner.default
-	COMMAND cucumber_cpp_runner.test
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/features
+	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -v -o "-v --strict --publish-quiet"
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
