@@ -128,7 +128,7 @@ jobs:
       - name: Install external dependencies
         run: |
           bundler install
-          conan install -if .conan .
+          conan install -if ${{ github.workspace }}/.conan .
 
       - name: Configure CMake
         run: >
@@ -139,6 +139,8 @@ jobs:
           -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}} 
           -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=${{matrix.packaging_maintainer_mode}} 
           -DGIT_SHA:STRING=${{ github.sha }}
+        env:
+          CMAKE_PREFIX_PATH: ${{ github.workspace }}/.conan
 
       - name: Build
         # Execute the build.  You can specify a specific target with "--target <NAME>"
