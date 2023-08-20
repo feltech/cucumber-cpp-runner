@@ -20,7 +20,7 @@ macro(
 		set(NEW_COMPILE_OPTIONS "${NEW_COMPILE_OPTIONS} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3")
 		message(STATUS "*** g++/clang _FORTIFY_SOURCE=3 enabled")
 
-		check_cxx_compiler_flag(-fstack-protector-strong STACK_PROTECTOR)
+		check_cxx_compiler_flag("-Werror -fstack-protector-strong" STACK_PROTECTOR)
 		if (STACK_PROTECTOR)
 			set(NEW_COMPILE_OPTIONS "${NEW_COMPILE_OPTIONS} -fstack-protector-strong")
 			message(STATUS "*** g++/clang -fstack-protector-strong enabled")
@@ -28,7 +28,7 @@ macro(
 			message(STATUS "*** g++/clang -fstack-protector-strong NOT enabled (not supported)")
 		endif ()
 
-		check_cxx_compiler_flag(-fcf-protection CF_PROTECTION)
+		check_cxx_compiler_flag("-Werror -fcf-protection" CF_PROTECTION)
 		if (CF_PROTECTION)
 			set(NEW_COMPILE_OPTIONS "${NEW_COMPILE_OPTIONS} -fcf-protection")
 			message(STATUS "*** g++/clang -fcf-protection enabled")
@@ -36,7 +36,7 @@ macro(
 			message(STATUS "*** g++/clang -fcf-protection NOT enabled (not supported)")
 		endif ()
 
-		check_cxx_compiler_flag(-fstack-clash-protection CLASH_PROTECTION)
+		check_cxx_compiler_flag("-Werror -fstack-clash-protection" CLASH_PROTECTION)
 		if (CLASH_PROTECTION)
 			if (LINUX OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 				set(NEW_COMPILE_OPTIONS "${NEW_COMPILE_OPTIONS} -fstack-clash-protection")
@@ -50,7 +50,8 @@ macro(
 	endif ()
 
 	if (${ubsan_minimal_runtime})
-		check_cxx_compiler_flag("-fsanitize=undefined -fno-sanitize-recover=undefined -fsanitize-minimal-runtime"
+		check_cxx_compiler_flag(
+			"-Werror -fsanitize=undefined -fno-sanitize-recover=undefined -fsanitize-minimal-runtime"
 			MINIMAL_RUNTIME)
 		if (MINIMAL_RUNTIME)
 			set(NEW_COMPILE_OPTIONS "${NEW_COMPILE_OPTIONS} -fsanitize=undefined -fsanitize-minimal-runtime")
