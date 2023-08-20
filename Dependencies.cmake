@@ -105,13 +105,13 @@ function(cucumber_cpp_runner_setup_dependencies)
 	# A bit heavyweight to bring in through CPM - so require external provision.
 	find_package(Boost REQUIRED)
 
-	if (NOT TARGET yaml-cpp::yaml-cpp)
-		cucumber_cpp_runner_cpm_install_package(
-			NAME GTest
-			GITHUB_REPOSITORY google/googletest
-			GIT_TAG v1.14.0
-		)
-	endif ()
+#	if (NOT TARGET yaml-cpp::yaml-cpp)
+#		cucumber_cpp_runner_cpm_install_package(
+#			NAME GTest
+#			GITHUB_REPOSITORY google/googletest
+#			GIT_TAG v1.14.0
+#		)
+#	endif ()
 	if (NOT TARGET CucumberCpp::cucumber-cpp)
 		cucumber_cpp_runner_cpm_install_package(
 			NAME CucumberCpp
