@@ -66,7 +66,7 @@ jobs:
         with:
           compiler: ${{ matrix.build.compiler }}
           build_type: ${{ matrix.build_type }}
-          packaging_maintainer_mode: ON
+          developer_defaults: OFF
           generator: ${{ matrix.build.generator }}
 
       - name: Project Name
@@ -112,9 +112,8 @@ jobs:
           cmake -S . -B ./build -G "${{matrix.build.generator}}" 
           -DBUILD_SHARED_LIBS=${{ matrix.build_shared }} 
           -D${{ env.PROJECT_NAME }}_ENABLE_TESTS=ON
-          -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{ matrix.enable_ipo }} 
+          -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{ matrix.enabddle_ipo }} 
           -DCMAKE_BUILD_TYPE:STRING=${{ matrix.build_type}} 
-          -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=ON
           -DGIT_SHA:STRING=${{ github.sha }}
         env:
           CMAKE_PREFIX_PATH: ${{ github.workspace }}/.conan
@@ -157,9 +156,7 @@ jobs:
             compiler: gcc-11
             generator: "Unix Makefiles"
             build_type: Debug
-            packaging_maintainer_mode: OFF
             build_shared: ON
-            enable_ipo: OFF
             gcov_executable: gcov
 
     steps:
@@ -170,7 +167,7 @@ jobs:
         with:
           compiler: ${{ matrix.config.compiler }}
           build_type: ${{ matrix.config.build_type }}
-          packaging_maintainer_mode: ${{ matrix.config.packaging_maintainer_mode }}
+          developer_defaults: ON
           generator: ${{ matrix.config.generator }}
 
       - name: Project Name
@@ -211,8 +208,8 @@ jobs:
       - name: Configure CMake
         run: >
           cmake -S . -B ./build -G "${{ matrix.config.generator }}" 
-          -D${{ env.PROJECT_NAME }}_ENABLE_TESTS=ON
-          -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{matrix.config.enable_ipo }} 
+          -D${{ env.PROJECT_NAME }}_ENABLE_DEVELOPER_DEFAULTS=ON
+          -D${{ env.PROJECT_NAME }}_ENABLE_CACHE=OFF
           -DCMAKE_BUILD_TYPE:STRING=${{matrix.config.build_type}} 
           -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=ON 
           -DGIT_SHA:STRING=${{ github.sha }}

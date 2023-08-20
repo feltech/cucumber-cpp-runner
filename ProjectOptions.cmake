@@ -19,6 +19,9 @@ macro(cucumber_cpp_runner_supports_sanitizers)
 endmacro()
 
 macro(cucumber_cpp_runner_setup_options)
+	option(cucumber_cpp_runner_ENABLE_DEVELOPER_DEFAULTS
+		"Set defaults of all options for development/testing, e.g. enable tests, linters, etc" OFF)
+	option(cucumber_cpp_runner_ENABLE_IPO "Enable IPO/LTO" ON)
 	option(cucumber_cpp_runner_ENABLE_HARDENING "Enable hardening" ON)
 	option(cucumber_cpp_runner_ENABLE_COVERAGE "Enable coverage reporting" OFF)
 	cmake_dependent_option(
@@ -30,8 +33,7 @@ macro(cucumber_cpp_runner_setup_options)
 
 	cucumber_cpp_runner_supports_sanitizers()
 
-	if (NOT PROJECT_IS_TOP_LEVEL OR cucumber_cpp_runner_PACKAGING_MAINTAINER_MODE)
-		option(cucumber_cpp_runner_ENABLE_IPO "Enable IPO/LTO" ON)
+	if (NOT cucumber_cpp_runner_ENABLE_DEVELOPER_DEFAULTS)
 		option(cucumber_cpp_runner_ENABLE_TESTS "Enable test targets" OFF)
 		option(cucumber_cpp_runner_WARNINGS_AS_ERRORS "Treat Warnings As Errors" OFF)
 		option(cucumber_cpp_runner_ENABLE_USER_LINKER "Enable user-selected linker" OFF)
@@ -48,7 +50,6 @@ macro(cucumber_cpp_runner_setup_options)
 		option(cucumber_cpp_runner_ENABLE_CACHE "Enable ccache" OFF)
 	else ()
 		option(cucumber_cpp_runner_ENABLE_TESTS "Enable test targets" ON)
-		option(cucumber_cpp_runner_ENABLE_IPO "Enable IPO/LTO" ON)
 		option(cucumber_cpp_runner_WARNINGS_AS_ERRORS "Treat Warnings As Errors" ON)
 		option(cucumber_cpp_runner_ENABLE_USER_LINKER "Enable user-selected linker" OFF)
 		option(cucumber_cpp_runner_ENABLE_SANITIZER_ADDRESS "Enable address sanitizer" ${SUPPORTS_ASAN})

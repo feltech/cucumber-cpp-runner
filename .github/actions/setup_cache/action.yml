@@ -10,7 +10,7 @@ inputs:
   generator:
     required: true
     type: string
-  packaging_maintainer_mode:
+  developer_defaults:
     required: true
     type: string
 
@@ -26,7 +26,7 @@ runs:
           ~/.cache/pip
           ~/.ccache
           ~/.conan
-        key: ${{ runner.os }}-${{ inputs.compiler }}-${{ inputs.build_type }}-${{ inputs.generator }}-${{ inputs.packaging_maintainer_mode }}-${{ hashFiles('**/CMakeLists.txt') }}
+        key: ${{ runner.os }}-${{ inputs.compiler }}-${{ inputs.build_type }}-${{ inputs.generator }}-${{ inputs.developer_defaults }}-${{ hashFiles('**/CMakeLists.txt') }}
         restore-keys: |
           ${{ runner.os }}-${{ inputs.compiler }}-${{ inputs.build_type }}
 

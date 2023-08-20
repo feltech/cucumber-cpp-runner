@@ -46,8 +46,6 @@ jobs:
           - "Ninja Multi-Config"
         build_type:
           - Debug
-        packaging_maintainer_mode:
-          - ON
 
     steps:
       - uses: actions/checkout@v3
@@ -57,7 +55,7 @@ jobs:
         with:
           compiler: ${{ matrix.compiler }}
           build_type: ${{ matrix.build_type }}
-          packaging_maintainer_mode: ${{ matrix.packaging_maintainer_mode }}
+          developer_defaults: OFF
           generator: ${{ matrix.generator }}
 
       - name: Project Name
@@ -95,7 +93,6 @@ jobs:
         run: >
           cmake -S . -B ./build -G "${{matrix.generator}}"
           -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}} 
-          -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=${{matrix.packaging_maintainer_mode}} 
         env:
           CMAKE_PREFIX_PATH: ${{ github.workspace }}/.conan
 

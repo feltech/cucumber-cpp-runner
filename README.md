@@ -20,7 +20,6 @@ conan install -if .conan
 # Build a release build, disabling linting. Add -Dcucumber_cpp_runner_ENABLE_TESTS to build tests.
 cmake -S . -B build \
 --preset unixlike-gcc-release\
--Dcucumber_cpp_runner_PACKAGING_MAINTAINER_MODE=ON
 -DCMAKE_PREFIX_PATH=.conan
 # Install CMAKE_PREFIX_PATH-friendly dist in "out/install/unixlike-gcc-release".
 cmake --install build
