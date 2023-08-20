@@ -22,12 +22,13 @@ foreach (target_name cucumber_cpp_runner cucumber_cpp_runner_nomain)
 	target_link_libraries(
 		${target_name}
 		PUBLIC
-		CucumberCpp::cucumber-cpp
+		CucumberCpp::cucumber-cpp-nomain
+		Boost::filesystem
 		PRIVATE
+		Boost::program_options
 		cucumber_cpp_runner_options
 		cucumber_cpp_runner_warnings
 		yaml-cpp::yaml-cpp
-		Boost::headers
 		fmt::fmt
 	)
 

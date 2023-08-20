@@ -21,7 +21,6 @@ add_executable(
 target_link_libraries(
 	cucumber_cpp_runner.test
 	PRIVATE
-	Boost::headers  # Dependency of CucumberCpp
 	cucumber_cpp_runner::cucumber_cpp_runner
 	# Enable coverage, etc.
 	cucumber_cpp_runner::cucumber_cpp_runner_options
