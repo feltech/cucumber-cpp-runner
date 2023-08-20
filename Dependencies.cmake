@@ -114,15 +114,17 @@ function(cucumber_cpp_runner_setup_dependencies)
 #			GIT_TAG v1.14.0
 #		)
 #	endif ()
-	if (NOT TARGET CucumberCpp::cucumber-cpp)
-		cucumber_cpp_runner_cpm_install_package(
-			NAME CucumberCpp
-			GITHUB_REPOSITORY cucumber/cucumber-cpp
-			GIT_TAG main
-			FIND_PACKAGE_OPTIONS
-			PATH_SUFFIXES lib/cmake
-			CMAKE_OPTIONS
+	if (NOT TARGET CucumberCpp::cucumber-cpp-nomain)
+		set(
+			_cucumber_cpp_cmake_options
+			# TODO(DF): Can't build as a separate shared lib because:
+			# > undefined reference to `typeinfo for cucumber::internal::CukeEngine'
+			# But Cucumber-Cpp is a public dependency, so if we statically link it into a shared
+			# library, then we need to re-export all its symbols, which is not trivial.
+			-DBUILD_SHARED_LIBS=FALSE
 			-DCUKE_ENABLE_GTEST=OFF
+			# It builds the driver regardless, if the boost unit_test_framework target exists, and
+			# then results in a build failure on Windows if disabled.
 			-DCUKE_ENABLE_BOOST_TEST=ON
 			-DCUKE_ENABLE_QT=OFF
 			-DCUKE_TESTS_E2E=OFF
@@ -130,7 +132,30 @@ function(cucumber_cpp_runner_setup_dependencies)
 			-DBoost_ROOT=${Boost_DIR}
 			-DCMAKE_VERBOSE_MAKEFILE=ON
 		)
+
+		# Pass along any external override to Boost static vs. shared.
+		if (DEFINED Boost_USE_STATIC_LIBS)
+			set(_cucumber_cpp_cmake_options
+				${_cucumber_cpp_cmake_options} -DCUKE_USE_STATIC_BOOST=${Boost_USE_STATIC_LIBS})
+		endif ()
+
+		cucumber_cpp_runner_cpm_install_package(
+			NAME CucumberCpp
+			GITHUB_REPOSITORY cucumber/cucumber-cpp
+			GIT_TAG main
+			FIND_PACKAGE_OPTIONS
+			PATH_SUFFIXES lib/cmake
+			CMAKE_OPTIONS
+			${_cucumber_cpp_cmake_options}
+		)
 	endif ()
+
+	# Disallow shared library builds of Cucumber-Cpp
+	get_target_property(_cucumber_cpp_target_type CucumberCpp::cucumber-cpp-nomain TYPE)
+	if (NOT _cucumber_cpp_target_type STREQUAL "STATIC_LIBRARY")
+		message(FATAL_ERROR "Cucumber-Cpp must be provided as a static library")
+	endif ()
+
 	if (NOT TARGET fmt::fmt)
 		cucumber_cpp_runner_cpm_install_package(
 			NAME fmt

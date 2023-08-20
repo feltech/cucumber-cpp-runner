@@ -47,7 +47,8 @@ jobs:
         build_type:
           - Release
         build_shared:
-          - ON
+          # Shared library builds are currently unsupported due issues with Cucumber-Cpp symbol
+          # export.
           - OFF
         enable_ipo:
           - ON

@@ -1,4 +1,5 @@
 #include <cucumber_cpp_runner/cucumber_cpp_runner.hpp>
+#include <cucumber_cpp_runner/cucumber_cpp_runner_export.hpp>
 
 #include <iostream>
 
@@ -11,7 +12,7 @@ constexpr int kExitSuccess = EXIT_SUCCESS;
 constexpr int kExitFailure = EXIT_FAILURE;
 constexpr unsigned kCmdHelpTextWidth = 80;
 
-int main(int argc, char ** argv)
+CUCUMBER_CPP_RUNNER_EXPORT int main(int argc, char ** argv)
 {
 	// Ensure ctest, etc, output doesn't get interleaved.
 	boost::scope_exit::aux::guard const flusher{[] { std::cout.flush(); }};
