@@ -121,12 +121,12 @@ jobs:
       - name: Build
         # Execute the build.  You can specify a specific target with "--target <NAME>"
         run: |
-          cmake --build ./build --config ${{matrix.build_type}} --parallel
+          cmake --build ./build --config ${{ matrix.build_type }} --parallel
 
       - name: Unix - Test and coverage
         working-directory: ./build
         run: |
-          ctest -C ${{matrix.build_type}}
+          ctest -C ${{matrix.build_type}} --output-on-failure
 
       - name: CPack
         if: matrix.package_generator != ''
