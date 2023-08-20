@@ -38,7 +38,7 @@ jobs:
           - os: ubuntu-20.04
             compiler: llvm-13
             generator: "Ninja Multi-Config"
-          - os: macos-11
+          - os: macos-12
             compiler: llvm-13
             generator: "Ninja Multi-Config"
           - os: windows-2019
