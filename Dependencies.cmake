@@ -59,6 +59,7 @@ function(cucumber_cpp_runner_cpm_install_package)
 			COMMAND ${CMAKE_COMMAND}
 			-S ${${args_NAME}_SOURCE_DIR}
 			-B ${${args_NAME}_BINARY_DIR}
+			-G "${CMAKE_GENERATOR}"
 			--compile-no-warning-as-error
 			-DCMAKE_BUILD_TYPE=${build_type}
 			-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
