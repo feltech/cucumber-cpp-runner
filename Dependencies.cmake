@@ -84,6 +84,7 @@ function(cucumber_cpp_runner_cpm_install_package)
 			COMMAND ${CMAKE_COMMAND}
 			--install ${${args_NAME}_BINARY_DIR}
 			--prefix ${cucumber_cpp_runner_DEPENDENCY_INSTALL_CACHE_DIR}
+			--config ${build_type}
 			COMMAND_ERROR_IS_FATAL ANY
 		)
 		find_package(
@@ -105,7 +106,7 @@ function(cucumber_cpp_runner_setup_dependencies)
 	# A bit heavyweight to bring in through CPM - so require external provision.
 	find_package(Boost REQUIRED)
 
-#	if (NOT TARGET yaml-cpp::yaml-cpp)
+#	if (NOT TARGET GTest::gtest)
 #		cucumber_cpp_runner_cpm_install_package(
 #			NAME GTest
 #			GITHUB_REPOSITORY google/googletest
