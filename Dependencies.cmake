@@ -36,7 +36,7 @@ function(cucumber_cpp_runner_cpm_install_package)
 	)
 
 	find_package(
-		${args_NAME}
+		${args_NAME} CONFIG
 		PATHS ${cucumber_cpp_runner_DEPENDENCY_INSTALL_CACHE_DIR}
 		${args_FIND_PACKAGE_OPTIONS}
 	)
@@ -114,6 +114,7 @@ function(cucumber_cpp_runner_setup_dependencies)
 #			GIT_TAG v1.14.0
 #		)
 #	endif ()
+	find_package(CucumberCpp QUIET)
 	if (NOT TARGET CucumberCpp::cucumber-cpp-nomain)
 		set(
 			_cucumber_cpp_cmake_options
@@ -156,6 +157,7 @@ function(cucumber_cpp_runner_setup_dependencies)
 		message(FATAL_ERROR "Cucumber-Cpp must be provided as a static library")
 	endif ()
 
+	find_package(fmt QUIET)
 	if (NOT TARGET fmt::fmt)
 		cucumber_cpp_runner_cpm_install_package(
 			NAME fmt
@@ -166,6 +168,8 @@ function(cucumber_cpp_runner_setup_dependencies)
 			-DFMT_DOC=OFF
 		)
 	endif ()
+
+	find_package(yaml-cpp QUIET)
 	if (NOT TARGET yaml-cpp::yaml-cpp)
 		cucumber_cpp_runner_cpm_install_package(
 			NAME yaml-cpp
