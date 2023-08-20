@@ -69,21 +69,17 @@ macro(cucumber_cpp_runner_enable_clang_tidy target WARNINGS_AS_ERRORS)
 		endif ()
 
 		# construct the clang-tidy command line
-		set(CLANG_TIDY_OPTIONS
-			${CLANGTIDY}
-			-extra-arg=-Wno-unknown-warning-option
-			-extra-arg=-Wno-ignored-optimization-argument
-			-extra-arg=-Wno-unused-command-line-argument
-			-p)
+		list(APPEND CLANG_TIDY_OPTIONS ${CLANGTIDY})
+		list(APPEND CLANG_TIDY_OPTIONS -extra-arg=-Wno-unknown-warning-option)
+		list(APPEND CLANG_TIDY_OPTIONS -extra-arg=-Wno-ignored-optimization-argument)
+		list(APPEND CLANG_TIDY_OPTIONS -extra-arg=-Wno-unused-command-line-argument)
+
 		# set standard
-		if (NOT
-			"${CMAKE_CXX_STANDARD}"
-			STREQUAL
-			"")
+		if (NOT "${CMAKE_CXX_STANDARD}" STREQUAL "")
 			if ("${CLANG_TIDY_OPTIONS_DRIVER_MODE}" STREQUAL "cl")
-				set(CLANG_TIDY_OPTIONS ${CLANG_TIDY_OPTIONS} -extra-arg=/std:c++${CMAKE_CXX_STANDARD})
+				list(APPEND CLANG_TIDY_OPTIONS -extra-arg=/std:c++${CMAKE_CXX_STANDARD})
 			else ()
-				set(CLANG_TIDY_OPTIONS ${CLANG_TIDY_OPTIONS} -extra-arg=-std=c++${CMAKE_CXX_STANDARD})
+				list(APPEND CLANG_TIDY_OPTIONS -extra-arg=-std=c++${CMAKE_CXX_STANDARD})
 			endif ()
 		endif ()
 
@@ -93,7 +89,7 @@ macro(cucumber_cpp_runner_enable_clang_tidy target WARNINGS_AS_ERRORS)
 		endif ()
 
 		message(STATUS "Also setting clang-tidy globally")
-		set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY_OPTIONS})
+		set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_OPTIONS}")
 	else ()
 		message(${WARNING_MESSAGE} "clang-tidy requested but executable not found")
 	endif ()
