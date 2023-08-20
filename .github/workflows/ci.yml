@@ -157,7 +157,6 @@ jobs:
             generator: "Unix Makefiles"
             build_type: Debug
             build_shared: ON
-            gcov_executable: gcov
 
     steps:
       - uses: actions/checkout@v3
@@ -182,7 +181,7 @@ jobs:
           cmake: true
           ninja: true
           conan: 1.59
-          ccache: true
+          ccache: false
           clangtidy: ${{ env.CLANG_TIDY_VERSION }}
           cppcheck: true
           gcovr: true
@@ -224,10 +223,8 @@ jobs:
       - name: Test and coverage
         working-directory: ./build
         run: |
-          find . -name "*.gcno"
           ctest -C ${{matrix.config.build_type}} --output-on-failure
-          find . -name "*.gcda"
-          gcovr -j ${{env.nproc}} --delete --root ../ --print-summary --xml-pretty --xml coverage.xml . --gcov-executable '${{ matrix.config.gcov_executable }}'
+          gcovr --root ../ --print-summary --xml-pretty --xml coverage.xml . 
 
       - name: Publish to codecov
         uses: codecov/codecov-action@v3
