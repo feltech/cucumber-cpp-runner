@@ -109,9 +109,10 @@ jobs:
       - name: Configure CMake
         run: >
           cmake -S . -B ./build -G "${{matrix.build.generator}}" 
+          -DBUILD_SHARED_LIBS=${{ matrix.build_shared }} 
           -D${{ env.PROJECT_NAME }}_ENABLE_TESTS=ON
-          -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{matrix.enable_ipo }} 
-          -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}} 
+          -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{ matrix.enable_ipo }} 
+          -DCMAKE_BUILD_TYPE:STRING=${{ matrix.build_type}} 
           -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=ON
           -DGIT_SHA:STRING=${{ github.sha }}
         env:
