@@ -163,7 +163,10 @@ std::tuple<std::string, int, std::string> parse_wire_config(fs::path const & wir
 
 fs::path find_wire_config(fs::path const & feature_path)
 {
-	for (fs::directory_entry const & entry : fs::recursive_directory_iterator(feature_path))
+	fs::path const feature_dir =
+		fs::is_directory(feature_path) ? feature_path : feature_path.parent_path();
+
+	for (fs::directory_entry const & entry : fs::recursive_directory_iterator(feature_dir))
 	{
 		if (fs::is_directory(entry))
 			continue;
@@ -183,7 +186,7 @@ fs::path find_wire_config(fs::path const & feature_path)
 		return file_path;
 	}
 	throw std::invalid_argument{
-		fmt::format(".wire file not found in directory tree {}", feature_path.string())};
+		fmt::format(".wire file not found in directory tree '{}'", feature_path.string())};
 }
 }  // namespace v1
 }  // namespace cucumber_cpp_runner

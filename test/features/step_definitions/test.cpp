@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 #include <cucumber-cpp/generic.hpp>
 
-GIVEN("this feature") {}
+GIVEN("this first feature") {}
+GIVEN("this second feature") {}
 WHEN("it is executed") {}
 THEN("it runs") {}

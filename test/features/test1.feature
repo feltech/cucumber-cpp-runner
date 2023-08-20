@@ -1,5 +1,5 @@
-Feature: Test
+Feature: Test 1
   Scenario: Testing feature execution
-    Given this feature
+    Given this first feature
     When it is executed
     Then it runs

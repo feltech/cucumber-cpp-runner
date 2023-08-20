@@ -31,10 +31,19 @@ int run_cucumber_exe(
 	std::string const cucumber_cmd =
 		fmt::format("{} {} {}", cucumber_exe, cucumber_options, feature_path.string());
 
-	if (verbose)
-		fmt::print(stderr, "Executing '{}'\n", cucumber_cmd);
+	// Cucumber-Wire doesn't have any documentation on how it locates .wire config files, but based
+	// on a glance at the code and experimentation, the cwd must have a `features` dir in it, which
+	// will then be searched recursively.
+	//
+	// So assume if a non-directory is given, then it's a `.feature` file inside a `features`
+	// directory. A bit brittle, but works OK.
+	fs::path const feature_dir =
+		fs::is_directory(feature_path) ? feature_path : feature_path.parent_path().parent_path();
 
-	bp::child cucumber = [&cucumber_cmd, &cucumber_stdout]
+	if (verbose)
+		fmt::print(stderr, "Executing '{}' in '{}'\n", cucumber_cmd, feature_dir.string());
+
+	bp::child cucumber = [&cucumber_cmd, &feature_dir, &cucumber_stdout]
 	{
 		auto env = boost::this_process::environment();
 		for (auto const & entry : env) fmt::print(stderr, entry.to_string());
@@ -45,7 +54,8 @@ int run_cucumber_exe(
 			cucumber_cmd.c_str(),
 			bp::std_in.close(),
 			(bp::std_out & bp::std_err) > cucumber_stdout,
-			env};
+			env,
+			bp::start_dir(feature_dir)};
 	}();
 
 	cucumber.wait();
@@ -65,11 +75,16 @@ int run_cucumber_exe(
 
 fs::path find_cucumber_exe(fs::path const & cucumber_exe)
 {
+	// If given path is already executable then don't try to search for it.
+	if ((fs::status(cucumber_exe).permissions() & fs::perms::owner_exe) != fs::perms::no_perms)
+		return cucumber_exe;
+
 	// Grr, libstdc++ 12.2/13.1 UBSan-detected bug:
 	//   https://gcc.gnu.org/bugzilla//show_bug.cgi?id=109703
 	fs::path path = boost::process::search_path(cucumber_exe);
 	if (path.empty())
-		throw std::runtime_error{"'cucumber' executable not found"};
+		throw std::runtime_error{
+			fmt::format("Cucumber executable not found using '{}'", cucumber_exe.string())};
 	return path;
 }
 
