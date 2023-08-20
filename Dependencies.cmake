@@ -63,6 +63,7 @@ function(cucumber_cpp_runner_cpm_install_package)
 			--compile-no-warning-as-error
 			-DCMAKE_BUILD_TYPE=${build_type}
 			-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+			-DCMAKE_POSITION_INDEPENDENT_CODE=ON
 			${_compile_flags}
 			#			-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
 			-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
