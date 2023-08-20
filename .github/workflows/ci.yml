@@ -226,7 +226,9 @@ jobs:
       - name: Test and coverage
         working-directory: ./build
         run: |
+          find . -name "*.gcno"
           ctest -C ${{matrix.config.build_type}}
+          find . -name "*.gcda"
           gcovr -j ${{env.nproc}} --delete --root ../ --print-summary --xml-pretty --xml coverage.xml . --gcov-executable '${{ matrix.config.gcov_executable }}'
 
       - name: Publish to codecov
