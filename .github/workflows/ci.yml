@@ -227,7 +227,7 @@ jobs:
         working-directory: ./build
         run: |
           find . -name "*.gcno"
-          ctest -C ${{matrix.config.build_type}}
+          ctest -C ${{matrix.config.build_type}} --output-on-failure
           find . -name "*.gcda"
           gcovr -j ${{env.nproc}} --delete --root ../ --print-summary --xml-pretty --xml coverage.xml . --gcov-executable '${{ matrix.config.gcov_executable }}'
 
