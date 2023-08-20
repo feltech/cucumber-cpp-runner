@@ -41,9 +41,9 @@ jobs:
           - os: macos-10.15
             compiler: llvm-13
             generator: "Ninja Multi-Config"
-          - os: windows-2022
+          - os: windows-2019
             compiler: msvc
-            generator: "Visual Studio 17 2022"
+            generator: "Visual Studio 16 2019"
         build_type:
           - Release
         build_shared:
