@@ -9,10 +9,6 @@
 #include <boost/process.hpp>
 #include <fmt/format.h>
 
-// Silence clang-tidy readability-magic-numbers, which doesn't like macros.
-constexpr int kExitFailure = EXIT_FAILURE;
-constexpr unsigned kCucumberTimeoutMs = 10000;
-
 namespace cucumber_cpp_runner
 {
 inline namespace v1
@@ -52,16 +48,9 @@ int run_cucumber_exe(
 			env};
 	}();
 
-	int const exit_code = [&cucumber_cmd, &cucumber]
-	{
-		if (!cucumber.wait_for(std::chrono::milliseconds{kCucumberTimeoutMs}))
-		{
-			fmt::print(stderr, "Timeout executing '{}'\n", cucumber_cmd);
-			cucumber.terminate();
-			return kExitFailure;
-		}
-		return cucumber.exit_code();
-	}();
+	cucumber.wait();
+
+	int const exit_code = cucumber.exit_code();
 
 	std::string const cucumber_output = [&cucumber_stdout]
 	{
