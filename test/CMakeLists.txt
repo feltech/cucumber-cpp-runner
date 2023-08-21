@@ -165,13 +165,21 @@ function(create_tmp_features target_name)
 	)
 endfunction()
 
+# Create a custom target that launches the test executable in a subdir of the binary dir.
+function(add_custom_target_test target_name)
+	add_custom_target(
+		${target_name}
+		COMMAND $<TARGET_FILE:cucumber_cpp_runner.test>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${target_name}
+	)
+	add_test_for_custom_target(${target_name})
+endfunction()
+
 # Symlink the .wire file
 
 create_tmp_features(cucumber_cpp_runner.test.symlink_wire)
 add_custom_target(
 	cucumber_cpp_runner.test.symlink_wire.setup.wire
-	${CMAKE_COMMAND} -E remove
-	${CMAKE_CURRENT_BINARY_DIR}/cucumber_cpp_runner.test.symlink_wire/features/step_definitions/cucumber.wire
 	COMMAND
 	${CMAKE_COMMAND} -E create_symlink
 	${CMAKE_CURRENT_SOURCE_DIR}/src/features/step_definitions/cucumber.wire
@@ -184,12 +192,7 @@ set_tests_properties(
 	FIXTURES_SETUP cucumber_cpp_runner.test.symlink_wire.setup.wire
 	FIXTURES_REQUIRED cucumber_cpp_runner.test.symlink_wire.setup.feature
 )
-add_custom_target(
-	cucumber_cpp_runner.test.symlink_wire
-	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test>
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cucumber_cpp_runner.test.symlink_wire
-)
-add_test_for_custom_target(cucumber_cpp_runner.test.symlink_wire)
+add_custom_target_test(cucumber_cpp_runner.test.symlink_wire)
 list(APPEND _symlink_wire.fixtures
 	cucumber_cpp_runner.test.symlink_wire.setup.wire
 	cucumber_cpp_runner.test.symlink_wire.setup.feature
@@ -206,9 +209,6 @@ create_tmp_features(cucumber_cpp_runner.test.bad_wire_tcp_and_unix)
 add_custom_target(
 	cucumber_cpp_runner.test.bad_wire_tcp_and_unix.setup.wire
 	COMMAND
-	${CMAKE_COMMAND} -E remove
-	${CMAKE_CURRENT_BINARY_DIR}/cucumber_cpp_runner.test.bad_wire_tcp_and_unix/features/step_definitions/cucumber.wire
-	COMMAND
 	${CMAKE_COMMAND} -E copy
 	${CMAKE_CURRENT_SOURCE_DIR}/resources/bad_wire_tcp_and_unix.wire
 	${CMAKE_CURRENT_BINARY_DIR}/cucumber_cpp_runner.test.bad_wire_tcp_and_unix/features/step_definitions/cucumber.wire
@@ -220,12 +220,7 @@ set_tests_properties(
 	FIXTURES_SETUP cucumber_cpp_runner.test.bad_wire_tcp_and_unix.setup.wire
 	FIXTURES_REQUIRED cucumber_cpp_runner.test.bad_wire_tcp_and_unix.setup.feature
 )
-add_custom_target(
-	cucumber_cpp_runner.test.bad_wire_tcp_and_unix
-	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test>
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cucumber_cpp_runner.test.bad_wire_tcp_and_unix
-)
-add_test_for_custom_target(cucumber_cpp_runner.test.bad_wire_tcp_and_unix)
+add_custom_target_test(cucumber_cpp_runner.test.bad_wire_tcp_and_unix)
 list(APPEND _bad_wire_tcp_and_unix.fixtures
 	cucumber_cpp_runner.test.bad_wire_tcp_and_unix.setup.wire
 	cucumber_cpp_runner.test.bad_wire_tcp_and_unix.setup.feature
@@ -236,3 +231,39 @@ set_tests_properties(
 	FIXTURES_REQUIRED "${_bad_wire_tcp_and_unix.fixtures}"
 	PASS_REGULAR_EXPRESSION "Both unix path .* and TCP host .* defined. Only one is supported"
 )
+
+# Unix socket
+
+create_tmp_features(cucumber_cpp_runner.test.unix_wire)
+add_custom_target(
+	cucumber_cpp_runner.test.unix_wire.setup.wire
+	COMMAND
+	${CMAKE_COMMAND} -E copy
+	${CMAKE_CURRENT_SOURCE_DIR}/resources/unix.wire
+	${CMAKE_CURRENT_BINARY_DIR}/cucumber_cpp_runner.test.unix_wire/features/step_definitions/cucumber.wire
+)
+add_test_for_custom_target(cucumber_cpp_runner.test.unix_wire.setup.wire)
+set_tests_properties(
+	cucumber_cpp_runner.test.unix_wire.setup.wire
+	PROPERTIES
+	FIXTURES_SETUP cucumber_cpp_runner.test.unix_wire.setup.wire
+	FIXTURES_REQUIRED cucumber_cpp_runner.test.unix_wire.setup.feature
+)
+add_custom_target_test(cucumber_cpp_runner.test.unix_wire)
+list(APPEND _unix_wire.fixtures
+	cucumber_cpp_runner.test.unix_wire.setup.wire
+	cucumber_cpp_runner.test.unix_wire.setup.feature
+	cucumber_cpp_runner.test.unix_wire.teardown.feature)
+set_tests_properties(
+	cucumber_cpp_runner.test.unix_wire
+	PROPERTIES
+	FIXTURES_REQUIRED "${_unix_wire.fixtures}"
+)
+if (WIN32)
+	# Unix path unsupported on Windows
+	set_tests_properties(
+		cucumber_cpp_runner.test.unix_wire
+		PROPERTIES
+		PASS_REGULAR_EXPRESSION "Unix paths are unsupported on this system"
+	)
+endif ()
