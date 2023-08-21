@@ -86,7 +86,7 @@ set_tests_properties(cucumber_cpp_runner.opt.features.file PROPERTIES
 
 add_test(
 	NAME cucumber_cpp_runner.opt.features.bad
-	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -v -o "--strict"
+	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -v -o "-v --strict"
 	-f ${CMAKE_CURRENT_BINARY_DIR}
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
@@ -106,19 +106,10 @@ set_tests_properties(cucumber_cpp_runner.opt.options PROPERTIES
 # Passing a custom `cucumber` executable.
 
 find_program(_cucumber_exe cucumber)
-add_custom_target(
-	cucumber_cpp_runner.test.custom_cucumber
-	COMMAND
-	${CMAKE_COMMAND} -E copy_if_different
-	"${_cucumber_exe}" "${CMAKE_CURRENT_BINARY_DIR}/customcucumber"
-	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -c "${CMAKE_CURRENT_BINARY_DIR}/customcucumber"
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
 add_test(
 	NAME cucumber_cpp_runner.opt.cucumber
 	COMMAND
-	${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target cucumber_cpp_runner.test.custom_cucumber
-	--config $<CONFIG>
+	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -c ${_cucumber_exe}
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
@@ -126,11 +117,56 @@ add_test(
 
 add_test(
 	NAME cucumber_cpp_runner.opt.cucumber.fail
-	COMMAND
 	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -c non_existent_cucumber_exe
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 set_tests_properties(cucumber_cpp_runner.opt.cucumber.fail PROPERTIES
 	PASS_REGULAR_EXPRESSION "Cucumber executable not found using 'non_existent_cucumber_exe'")
 
+# Symlink the .wire file
 
+add_custom_target(
+	cucumber_cpp_runner.test.symlink_wire
+	COMMAND
+	${CMAKE_COMMAND} -E copy_directory
+	"${CMAKE_CURRENT_SOURCE_DIR}/features" "${CMAKE_CURRENT_BINARY_DIR}/symlink_wire/features"
+	COMMAND
+	${CMAKE_COMMAND} -E remove
+	"${CMAKE_CURRENT_BINARY_DIR}/symlink_wire/features/step_definitions/cucumber.wire"
+	COMMAND
+	${CMAKE_COMMAND} -E create_symlink
+	"${CMAKE_CURRENT_SOURCE_DIR}/features/step_definitions/cucumber.wire"
+	"${CMAKE_CURRENT_BINARY_DIR}/symlink_wire/features/step_definitions/cucumber.wire"
+	COMMAND
+	$<TARGET_FILE:cucumber_cpp_runner.test> -f "${CMAKE_CURRENT_BINARY_DIR}/symlink_wire"
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+add_custom_target(
+	cucumber_cpp_runner.test.symlink_wire.teardown
+	COMMAND
+	${CMAKE_COMMAND} -E remove_directory
+	"${CMAKE_CURRENT_BINARY_DIR}/symlink_wire"
+)
+add_test(
+	NAME cucumber_cpp_runner.symlink_wire
+	COMMAND
+	${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --config $<CONFIG>
+	--target cucumber_cpp_runner.test.symlink_wire
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+add_test(
+	NAME cucumber_cpp_runner.symlink_wire.teardown
+	COMMAND
+	${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --config $<CONFIG>
+	--target cucumber_cpp_runner.test.symlink_wire.teardown
+)
+set_tests_properties(
+	cucumber_cpp_runner.symlink_wire.teardown
+	PROPERTIES
+	FIXTURES_CLEANUP cucumber_cpp_runner.symlink_wire.teardown
+)
+set_tests_properties(
+	cucumber_cpp_runner.symlink_wire
+	PROPERTIES
+	FIXTURES_REQUIRED cucumber_cpp_runner.symlink_wire.teardown
+)
