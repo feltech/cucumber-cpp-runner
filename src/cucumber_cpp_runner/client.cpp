@@ -55,7 +55,7 @@ int run_cucumber_exe(
 			bp::std_in.close(),
 			(bp::std_out & bp::std_err) > cucumber_stdout,
 			env,
-			bp::start_dir(feature_dir)};
+			bp::start_dir(feature_dir.string())};
 	}();
 
 	cucumber.wait();
