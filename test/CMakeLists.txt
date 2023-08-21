@@ -99,7 +99,7 @@ find_program(_cucumber_exe cucumber)
 add_custom_target(
 	cucumber_cpp_runner.test.custom_cucumber
 	COMMAND
-	${CMAKE_COMMAND} -E create_symlink
+	${CMAKE_COMMAND} -E copy_if_different
 	"${_cucumber_exe}" "${CMAKE_CURRENT_BINARY_DIR}/customcucumber"
 	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -c "${CMAKE_CURRENT_BINARY_DIR}/customcucumber"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -108,6 +108,7 @@ add_test(
 	NAME cucumber_cpp_runner.opt.cucumber
 	COMMAND
 	${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target cucumber_cpp_runner.test.custom_cucumber
+	--config $<CONFIG>
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
