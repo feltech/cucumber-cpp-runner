@@ -123,7 +123,7 @@ jobs:
         run: |
           cmake --build ./build --config ${{ matrix.build_type }} --parallel
 
-      - name: Unix - Test and coverage
+      - name: Test
         working-directory: ./build
         run: |
           ctest -C ${{matrix.build_type}} --output-on-failure
