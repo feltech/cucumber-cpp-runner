@@ -41,6 +41,16 @@ add_test(
 set_tests_properties(cucumber_cpp_runner.default.content PROPERTIES
 	PASS_REGULAR_EXPRESSION "2 scenarios \\(2 passed\\)")
 
+# Help text
+
+add_test(
+	NAME cucumber_cpp_runner.opt.help
+	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -h
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+set_tests_properties(cucumber_cpp_runner.opt.help PROPERTIES
+	PASS_REGULAR_EXPRESSION "Allowed options")
+
 # Verbose mode
 
 add_test(
