@@ -75,17 +75,16 @@ int run_cucumber_exe(
 
 fs::path find_cucumber_exe(fs::path const & cucumber_exe)
 {
-	// If given path is already executable then don't try to search for it.
-	if ((fs::status(cucumber_exe).permissions() & fs::perms::owner_exe) != fs::perms::no_perms)
+	if (fs::is_regular_file(cucumber_exe) || fs::is_symlink(cucumber_exe))
 		return cucumber_exe;
 
 	// Grr, libstdc++ 12.2/13.1 UBSan-detected bug:
 	//   https://gcc.gnu.org/bugzilla//show_bug.cgi?id=109703
-	fs::path path = boost::process::search_path(cucumber_exe);
-	if (path.empty())
+	fs::path resolved_path = boost::process::search_path(cucumber_exe);
+	if (resolved_path.empty())
 		throw std::runtime_error{
 			fmt::format("Cucumber executable not found using '{}'", cucumber_exe.string())};
-	return path;
+	return resolved_path;
 }
 
 }  // namespace v1
