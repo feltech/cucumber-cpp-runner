@@ -1,0 +1,3 @@
+host: localhost
+port: 3905
+unix: /some/socket
