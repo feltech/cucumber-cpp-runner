@@ -45,7 +45,7 @@ jobs:
         generator:
           - "Ninja Multi-Config"
         build_type:
-          - Debug
+          - RelWithDebInfo
 
     steps:
       - uses: actions/checkout@v3
@@ -92,7 +92,6 @@ jobs:
       - name: Configure CMake
         run: >
           cmake -S . -B ./build -G "${{matrix.generator}}"
-          -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}} 
         env:
           CMAKE_PREFIX_PATH: ${{ github.workspace }}/.conan
 
@@ -109,7 +108,7 @@ jobs:
       - name: Build
         # Execute the build.  You can specify a specific target with "--target <NAME>"
         run: |
-          cmake --build ./build --config ${{matrix.build_type}}
+          cmake --build ./build --config ${{matrix.build_type}} --parallel
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
