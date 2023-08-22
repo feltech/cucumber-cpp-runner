@@ -46,7 +46,9 @@ int run_cucumber_exe(
 	bp::child cucumber = [&cucumber_cmd, &feature_dir, &cucumber_stdout]
 	{
 		auto env = boost::this_process::environment();
-		for (auto const & entry : env) fmt::print(stderr, entry.to_string());
+		// TODO(DF): Remove debugging output.
+		//		for (auto const & entry : env)
+		//			fmt::print(stderr, "{}={}\n", entry.get_name(), entry.to_string());
 		// Silence "THIS RUBY IMPLEMENTATION DOESN'T REPORT FILE AND LINE FOR PROCS"
 		env["RUBY_IGNORE_CALLERS"] = "1";
 
