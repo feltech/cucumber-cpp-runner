@@ -10,7 +10,7 @@
 // Silence clang-tidy readability-magic-numbers, which doesn't like macros.
 constexpr int kExitSuccess = EXIT_SUCCESS;
 constexpr int kExitFailure = EXIT_FAILURE;
-constexpr unsigned kCmdHelpTextWidth = 80;
+constexpr unsigned kCmdHelpTextWidth = 40;
 
 CUCUMBER_CPP_RUNNER_EXPORT int main(int argc, char ** argv)
 {
@@ -35,7 +35,7 @@ CUCUMBER_CPP_RUNNER_EXPORT int main(int argc, char ** argv)
 
 	if (cmd_options.count("help") != 0U)
 	{
-		cmd_options_desc.print(std::cerr, kCmdHelpTextWidth);
+		cmd_options_desc.print(std::cout, kCmdHelpTextWidth);
 		return kExitSuccess;
 	}
 
