@@ -21,7 +21,12 @@ endmacro()
 macro(cucumber_cpp_runner_setup_options)
 	option(cucumber_cpp_runner_ENABLE_DEVELOPER_DEFAULTS
 		"Set defaults of all options for development/testing, e.g. enable tests, linters, etc" OFF)
-	option(cucumber_cpp_runner_ENABLE_IPO "Enable IPO/LTO" ON)
+	if (WIN32)
+		# VS2019 locally: LINK : fatal error LNK1000: Internal error during IMAGE::BuildImage
+		option(cucumber_cpp_runner_ENABLE_IPO "Enable IPO/LTO" OFF)
+	else ()
+		option(cucumber_cpp_runner_ENABLE_IPO "Enable IPO/LTO" ON)
+	endif ()
 	option(cucumber_cpp_runner_ENABLE_CACHE "Enable ccache" ON)
 	option(cucumber_cpp_runner_ENABLE_HARDENING "Enable hardening" ON)
 	option(cucumber_cpp_runner_ENABLE_COVERAGE "Enable coverage reporting" OFF)
