@@ -104,8 +104,7 @@ set_tests_properties(cucumber_cpp_runner.opt.options PROPERTIES
 	PASS_REGULAR_EXPRESSION "2 scenarios \\(2 skipped\\)")
 
 # Passing a custom `cucumber` executable.
-
-find_program(_cucumber_exe cucumber)
+find_program(_cucumber_exe cucumber REQUIRED)
 add_test(
 	NAME cucumber_cpp_runner.opt.cucumber
 	COMMAND
