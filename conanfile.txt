@@ -3,5 +3,6 @@ boost/1.78.0
 
 [generators]
 CMakeDeps
+CMakeToolchain
 
 
