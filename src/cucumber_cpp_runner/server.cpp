@@ -152,10 +152,13 @@ std::tuple<std::string, int, std::string> parse_wire_config(fs::path const & wir
 		port = config["port"].as<int>();
 	}
 
-#ifndef BOOST_ASIO_HAS_LOCAL_SOCKETS
+// BOOST_ASIO_HAS_LOCAL_SOCKETS _is_ supposedly supported on Windows, but apparently the reuse_addr argument to the
+// stream_protocol::acceptor must be false (not the default). However, we don't have control over the acceptor here,
+// Cucumber-Cpp constructs that and it's private.
+#if !defined BOOST_ASIO_HAS_LOCAL_SOCKETS || defined CUCUMBER_CPP_RUNNER_IS_WIN32
 	if (!unix_path.empty())
 		throw std::invalid_argument{
-			fmt::print(stderr, "Unix paths are unsupported on this system: '{}'", unix_path)};
+			fmt::format("Unix paths are unsupported on this system: '{}'", unix_path)};
 #endif
 
 	return {std::move(host), port, std::move(unix_path)};

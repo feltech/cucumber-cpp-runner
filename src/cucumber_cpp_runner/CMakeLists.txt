@@ -45,6 +45,15 @@ foreach (target_name cucumber_cpp_runner cucumber_cpp_runner_nomain)
 		VISIBILITY_INLINES_HIDDEN YES
 	)
 
+	if (WIN32)
+		target_compile_definitions(
+			${target_name}
+			PRIVATE
+			# For branching by platform within code.
+			CUCUMBER_CPP_RUNNER_IS_WIN32=1
+		)
+	endif ()
+
 	if (NOT BUILD_SHARED_LIBS)
 		target_compile_definitions(${target_name} PUBLIC CUCUMBER_CPP_RUNNER_STATIC_DEFINE)
 	endif ()
