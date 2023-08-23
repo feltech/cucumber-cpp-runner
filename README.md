@@ -24,3 +24,17 @@ cmake -S . -B build \
 # Install CMAKE_PREFIX_PATH-friendly dist in "out/install/unixlike-gcc-release".
 cmake --install build
 ```
+
+
+### Windows 10
+
+```DOS
+: As admin.
+: Note: conda ruby is built with MSVC, but cucumber has dependency on `ffi` package, which is unavailable for MSVC
+: builds and requires an MSYS2 build of ruby. Hence using chocolatey.
+choco install ruby --version 2.7.7.1
+: For non-admin non-polluting install (must add .ruby\ruby\2.7.0 to GEM_PATH and .ruby\ruby\2.7.0\bin to PATH for tests 
+: though)
+bundler install --binstubs --path .ruby
+# Rest similar to Linux...
+```
