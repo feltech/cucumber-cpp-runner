@@ -104,11 +104,14 @@ set_tests_properties(cucumber_cpp_runner.opt.options PROPERTIES
 	PASS_REGULAR_EXPRESSION "2 scenarios \\(2 skipped\\)")
 
 # Passing a custom `cucumber` executable.
-find_program(_cucumber_exe cucumber REQUIRED)
+
+# Win32 cucumber - we must locate the .bat file, not the script: https://gitlab.kitware.com/cmake/cmake/-/issues/16453
+find_program(_cucumber_exe_path NAMES cucumber.bat cucumber REQUIRED)
+cmake_path(NATIVE_PATH _cucumber_exe_path _cucumber_exe_path_native)
 add_test(
 	NAME cucumber_cpp_runner.opt.cucumber
 	COMMAND
-	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -c ${_cucumber_exe}
+	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -c ${_cucumber_exe_path_native}
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
@@ -171,6 +174,7 @@ function(add_custom_target_test target_name)
 		COMMAND $<TARGET_FILE:cucumber_cpp_runner.test>
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${target_name}
 	)
+	add_dependencies(${target_name} cucumber_cpp_runner.test)
 	add_test_for_custom_target(${target_name})
 endfunction()
 
