@@ -184,7 +184,7 @@ create_tmp_features(cucumber_cpp_runner.test.symlink_wire)
 add_custom_target(
 	cucumber_cpp_runner.test.symlink_wire.setup.wire
 	COMMAND
-	${CMAKE_COMMAND} -E create_symlink
+	${CMAKE_COMMAND} -E $<IF:$<BOOL:${WIN32}>,copy,create_symlink>
 	${CMAKE_CURRENT_SOURCE_DIR}/src/features/step_definitions/cucumber.wire
 	${CMAKE_CURRENT_BINARY_DIR}/cucumber_cpp_runner.test.symlink_wire/features/step_definitions/cucumber.wire
 )
