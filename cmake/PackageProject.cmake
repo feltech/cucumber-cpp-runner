@@ -1,3 +1,4 @@
+cmake_policy(SET CMP0135 NEW)
 # Uses ycm (permissive BSD-3-Clause license) and ForwardArguments (permissive MIT license)
 
 function(cucumber_cpp_runner_package_project)
