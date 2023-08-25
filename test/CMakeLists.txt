@@ -125,16 +125,6 @@ add_test(
 set_tests_properties(cucumber_cpp_runner.opt.cucumber.nonexistent PROPERTIES
 	PASS_REGULAR_EXPRESSION "Cucumber executable not found using 'non_existent_cucumber_exe'")
 
-# Create a test target that launches a custom target of the same name
-function(add_test_for_custom_target target_name)
-	add_test(
-		NAME ${target_name}
-		COMMAND
-		${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --config $<CONFIG> --target ${target_name}
-	)
-endfunction()
-
-
 # Invalid cucumber executable
 
 add_test(
@@ -144,6 +134,23 @@ add_test(
 	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -c perl -o "--help"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+
+
+# Functions for more complex tests.
+
+# Create a simple fixture test in an isolate directory.
+function(add_custom_target_test_with_tmp_fixtures target_name fixtures_list)
+	create_tmp_features(${target_name})
+	add_custom_target_test(${target_name})
+	list(APPEND ${fixtures_list}
+		${target_name}.setup.feature
+		${target_name}.teardown.feature)
+	set_tests_properties(
+		${target_name}
+		PROPERTIES
+		FIXTURES_REQUIRED "${${fixtures_list}}"
+	)
+endfunction()
 
 # Create fixtures to copy features into a temporary directory and remove when done.
 #
@@ -189,9 +196,18 @@ function(add_custom_target_test target_name)
 	add_test_for_custom_target(${target_name})
 endfunction()
 
+# Create a test target that launches a custom target of the same name
+function(add_test_for_custom_target target_name)
+	add_test(
+		NAME ${target_name}
+		COMMAND
+		${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --config $<CONFIG> --target ${target_name}
+	)
+endfunction()
+
+
 # Symlink the .wire file
 
-create_tmp_features(cucumber_cpp_runner.test.symlink_wire)
 add_custom_target(
 	cucumber_cpp_runner.test.symlink_wire.setup.wire
 	COMMAND
@@ -206,20 +222,14 @@ set_tests_properties(
 	FIXTURES_SETUP cucumber_cpp_runner.test.symlink_wire.setup.wire
 	FIXTURES_REQUIRED cucumber_cpp_runner.test.symlink_wire.setup.feature
 )
-add_custom_target_test(cucumber_cpp_runner.test.symlink_wire)
 list(APPEND _symlink_wire.fixtures
-	cucumber_cpp_runner.test.symlink_wire.setup.wire
-	cucumber_cpp_runner.test.symlink_wire.setup.feature
-	cucumber_cpp_runner.test.symlink_wire.teardown.feature)
-set_tests_properties(
-	cucumber_cpp_runner.test.symlink_wire
-	PROPERTIES
-	FIXTURES_REQUIRED "${_symlink_wire.fixtures}"
-)
+	cucumber_cpp_runner.test.symlink_wire.setup.wire)
+
+add_custom_target_test_with_tmp_fixtures(
+	cucumber_cpp_runner.test.symlink_wire _symlink_wire.fixtures)
 
 # Invalid .wire specifying both unix path and tcp host
 
-create_tmp_features(cucumber_cpp_runner.test.bad_wire_tcp_and_unix)
 add_custom_target(
 	cucumber_cpp_runner.test.bad_wire_tcp_and_unix.setup.wire
 	COMMAND
@@ -228,27 +238,27 @@ add_custom_target(
 	${CMAKE_CURRENT_BINARY_DIR}/cucumber_cpp_runner.test.bad_wire_tcp_and_unix/features/step_definitions/cucumber.wire
 )
 add_test_for_custom_target(cucumber_cpp_runner.test.bad_wire_tcp_and_unix.setup.wire)
+
+list(APPEND _bad_wire_tcp_and_unix.fixtures
+	cucumber_cpp_runner.test.bad_wire_tcp_and_unix.setup.wire)
+
+add_custom_target_test_with_tmp_fixtures(
+	cucumber_cpp_runner.test.bad_wire_tcp_and_unix _bad_wire_tcp_and_unix.fixtures)
+
 set_tests_properties(
 	cucumber_cpp_runner.test.bad_wire_tcp_and_unix.setup.wire
 	PROPERTIES
 	FIXTURES_SETUP cucumber_cpp_runner.test.bad_wire_tcp_and_unix.setup.wire
 	FIXTURES_REQUIRED cucumber_cpp_runner.test.bad_wire_tcp_and_unix.setup.feature
 )
-add_custom_target_test(cucumber_cpp_runner.test.bad_wire_tcp_and_unix)
-list(APPEND _bad_wire_tcp_and_unix.fixtures
-	cucumber_cpp_runner.test.bad_wire_tcp_and_unix.setup.wire
-	cucumber_cpp_runner.test.bad_wire_tcp_and_unix.setup.feature
-	cucumber_cpp_runner.test.bad_wire_tcp_and_unix.teardown.feature)
 set_tests_properties(
 	cucumber_cpp_runner.test.bad_wire_tcp_and_unix
 	PROPERTIES
-	FIXTURES_REQUIRED "${_bad_wire_tcp_and_unix.fixtures}"
 	PASS_REGULAR_EXPRESSION "Both unix path .* and TCP host .* defined. Only one is supported"
 )
 
 # Unix socket
 
-create_tmp_features(cucumber_cpp_runner.test.unix_wire)
 add_custom_target(
 	cucumber_cpp_runner.test.unix_wire.setup.wire
 	COMMAND
@@ -263,16 +273,13 @@ set_tests_properties(
 	FIXTURES_SETUP cucumber_cpp_runner.test.unix_wire.setup.wire
 	FIXTURES_REQUIRED cucumber_cpp_runner.test.unix_wire.setup.feature
 )
-add_custom_target_test(cucumber_cpp_runner.test.unix_wire)
 list(APPEND _unix_wire.fixtures
-	cucumber_cpp_runner.test.unix_wire.setup.wire
-	cucumber_cpp_runner.test.unix_wire.setup.feature
-	cucumber_cpp_runner.test.unix_wire.teardown.feature)
-set_tests_properties(
-	cucumber_cpp_runner.test.unix_wire
-	PROPERTIES
-	FIXTURES_REQUIRED "${_unix_wire.fixtures}"
-)
+	cucumber_cpp_runner.test.unix_wire.setup.wire)
+
+add_custom_target_test_with_tmp_fixtures(
+	cucumber_cpp_runner.test.unix_wire _unix_wire.fixtures)
+
+
 if (WIN32)
 	# Unix path unsupported on Windows
 	set_tests_properties(
