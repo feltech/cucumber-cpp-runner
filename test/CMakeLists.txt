@@ -131,7 +131,7 @@ add_test(
 	NAME cucumber_cpp_runner.opt.cucumber.bad_exe
 	COMMAND
 	# If we have cucumber command line, then surely we have perl
-	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -c perl -o "--help"
+	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -v -c perl -o "--help"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
@@ -310,7 +310,7 @@ list(APPEND _unix_wire_invalid_cucumber.fixtures
 add_custom_target_test_with_tmp_fixtures(
 	cucumber_cpp_runner.test.unix_wire_invalid_cucumber
 	_unix_wire_invalid_cucumber.fixtures
-	-c ruby -o "--help"
+	-v -c ruby -o "--help"
 )
 
 if (WIN32)
