@@ -115,14 +115,14 @@ add_test(
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-# Passing an invalid custom `cucumber` executable.
+# Passing an nonexistent custom `cucumber` executable.
 
 add_test(
-	NAME cucumber_cpp_runner.opt.cucumber.fail
+	NAME cucumber_cpp_runner.opt.cucumber.nonexistent
 	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -c non_existent_cucumber_exe
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-set_tests_properties(cucumber_cpp_runner.opt.cucumber.fail PROPERTIES
+set_tests_properties(cucumber_cpp_runner.opt.cucumber.nonexistent PROPERTIES
 	PASS_REGULAR_EXPRESSION "Cucumber executable not found using 'non_existent_cucumber_exe'")
 
 # Create a test target that launches a custom target of the same name
@@ -133,6 +133,17 @@ function(add_test_for_custom_target target_name)
 		${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --config $<CONFIG> --target ${target_name}
 	)
 endfunction()
+
+
+# Invalid cucumber executable
+
+add_test(
+	NAME cucumber_cpp_runner.opt.cucumber.bad_exe
+	COMMAND
+	# If we have cucumber command line, then surely we have perl
+	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -c perl -o "--help"
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
 
 # Create fixtures to copy features into a temporary directory and remove when done.
 #
