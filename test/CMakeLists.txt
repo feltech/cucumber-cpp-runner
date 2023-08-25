@@ -141,7 +141,7 @@ add_test(
 # Create a simple fixture test in an isolate directory.
 function(add_custom_target_test_with_tmp_fixtures target_name fixtures_list)
 	create_tmp_features(${target_name})
-	add_custom_target_test(${target_name})
+	add_custom_target_test(${target_name} ${ARGN})
 	list(APPEND ${fixtures_list}
 		${target_name}.setup.feature
 		${target_name}.teardown.feature)
@@ -189,7 +189,7 @@ endfunction()
 function(add_custom_target_test target_name)
 	add_custom_target(
 		${target_name}
-		COMMAND $<TARGET_FILE:cucumber_cpp_runner.test>
+		COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> ${ARGN}
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${target_name}
 	)
 	add_dependencies(${target_name} cucumber_cpp_runner.test)
@@ -279,11 +279,44 @@ list(APPEND _unix_wire.fixtures
 add_custom_target_test_with_tmp_fixtures(
 	cucumber_cpp_runner.test.unix_wire _unix_wire.fixtures)
 
-
 if (WIN32)
 	# Unix path unsupported on Windows
 	set_tests_properties(
 		cucumber_cpp_runner.test.unix_wire
+		PROPERTIES
+		PASS_REGULAR_EXPRESSION "Unix paths are unsupported on this system"
+	)
+endif()
+
+# Invalid cucumber exe with unix socket
+
+add_custom_target(
+	cucumber_cpp_runner.test.unix_wire_invalid_cucumber.setup.wire
+	COMMAND
+	${CMAKE_COMMAND} -E copy
+	${CMAKE_CURRENT_SOURCE_DIR}/resources/unix.wire
+	${CMAKE_CURRENT_BINARY_DIR}/cucumber_cpp_runner.test.unix_wire_invalid_cucumber/features/step_definitions/cucumber.wire
+)
+add_test_for_custom_target(cucumber_cpp_runner.test.unix_wire_invalid_cucumber.setup.wire)
+set_tests_properties(
+	cucumber_cpp_runner.test.unix_wire_invalid_cucumber.setup.wire
+	PROPERTIES
+	FIXTURES_SETUP cucumber_cpp_runner.test.unix_wire_invalid_cucumber.setup.wire
+	FIXTURES_REQUIRED cucumber_cpp_runner.test.unix_wire_invalid_cucumber.setup.feature
+)
+list(APPEND _unix_wire_invalid_cucumber.fixtures
+	cucumber_cpp_runner.test.unix_wire_invalid_cucumber.setup.wire)
+
+add_custom_target_test_with_tmp_fixtures(
+	cucumber_cpp_runner.test.unix_wire_invalid_cucumber
+	_unix_wire_invalid_cucumber.fixtures
+	-c ruby -o "--help"
+)
+
+if (WIN32)
+	# Unix path unsupported on Windows
+	set_tests_properties(
+		cucumber_cpp_runner.test.unix_wire_invalid_cucumber
 		PROPERTIES
 		PASS_REGULAR_EXPRESSION "Unix paths are unsupported on this system"
 	)
