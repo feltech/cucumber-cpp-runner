@@ -350,3 +350,41 @@ if (WIN32)
 		PASS_REGULAR_EXPRESSION "Unix paths are unsupported on this system"
 	)
 endif ()
+
+
+#---------------------------------------------------------------------------------------------------
+# Custom main
+
+add_executable(
+	cucumber_cpp_runner.test.nomain
+	src/features/step_definitions/test.cpp
+	src/custom_main.cpp
+)
+
+target_link_libraries(
+	cucumber_cpp_runner.test.nomain
+	PRIVATE
+	cucumber_cpp_runner::cucumber_cpp_runner_nomain
+	cucumber_cpp_runner::cucumber_cpp_runner_options
+)
+
+add_test(
+	NAME cucumber_cpp_runner.nomain.exit_code
+	COMMAND cucumber_cpp_runner.test.nomain
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+add_test(
+	NAME cucumber_cpp_runner.nomain.content
+	COMMAND cucumber_cpp_runner.test.nomain
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+set_tests_properties(cucumber_cpp_runner.nomain.content PROPERTIES
+	PASS_REGULAR_EXPRESSION "2 scenarios \\(2 passed\\)")
+
+add_test(
+	NAME cucumber_cpp_runner.nomain.error
+	COMMAND cucumber_cpp_runner.test.nomain
+	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
+set_tests_properties(cucumber_cpp_runner.nomain.error PROPERTIES
+	PASS_REGULAR_EXPRESSION "Failed custom main: .wire file not found in directory tree '.'")
