@@ -13,6 +13,10 @@ if (PROJECT_IS_TOP_LEVEL OR TEST_INSTALLED_VERSION)
 	endif ()
 endif ()
 
+
+#---------------------------------------------------------------------------------------------------
+# Simple cucumber test executable/server wrapper
+
 add_executable(
 	cucumber_cpp_runner.test
 	src/features/step_definitions/test.cpp
@@ -22,10 +26,11 @@ target_link_libraries(
 	cucumber_cpp_runner.test
 	PRIVATE
 	cucumber_cpp_runner::cucumber_cpp_runner
-	# Enable coverage, etc.
 	cucumber_cpp_runner::cucumber_cpp_runner_options
 )
 
+
+#---------------------------------------------------------------------------------------------------
 # Default happy path.
 
 add_test(
@@ -41,6 +46,8 @@ add_test(
 set_tests_properties(cucumber_cpp_runner.default.content PROPERTIES
 	PASS_REGULAR_EXPRESSION "2 scenarios \\(2 passed\\)")
 
+
+#---------------------------------------------------------------------------------------------------
 # Help text
 
 add_test(
@@ -61,6 +68,8 @@ add_test(
 set_tests_properties(cucumber_cpp_runner.opt.verbose PROPERTIES
 	PASS_REGULAR_EXPRESSION "Listening on")
 
+
+#---------------------------------------------------------------------------------------------------
 # Specifying feature directory from outside of feature tree.
 
 add_test(
@@ -70,6 +79,8 @@ add_test(
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 
+
+#---------------------------------------------------------------------------------------------------
 # Specifying a particular feature file from outside of feature tree.
 
 add_test(
@@ -82,6 +93,8 @@ set_tests_properties(cucumber_cpp_runner.opt.features.file PROPERTIES
 	FAIL_REGULAR_EXPRESSION "this second feature"
 )
 
+
+#---------------------------------------------------------------------------------------------------
 # Specifying invalid feature directory
 
 add_test(
@@ -93,6 +106,8 @@ add_test(
 set_tests_properties(cucumber_cpp_runner.opt.features.bad PROPERTIES
 	PASS_REGULAR_EXPRESSION "wire file not found in directory tree '${CMAKE_CURRENT_BINARY_DIR}'")
 
+
+#---------------------------------------------------------------------------------------------------
 # Passing additional options to the `cucumber` command line.
 
 add_test(
@@ -103,6 +118,8 @@ add_test(
 set_tests_properties(cucumber_cpp_runner.opt.options PROPERTIES
 	PASS_REGULAR_EXPRESSION "2 scenarios \\(2 skipped\\)")
 
+
+#---------------------------------------------------------------------------------------------------
 # Passing a custom `cucumber` executable.
 
 # Win32 cucumber - we must locate the .bat file, not the script: https://gitlab.kitware.com/cmake/cmake/-/issues/16453
@@ -115,6 +132,8 @@ add_test(
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+
+#---------------------------------------------------------------------------------------------------
 # Passing an nonexistent custom `cucumber` executable.
 
 add_test(
@@ -125,6 +144,8 @@ add_test(
 set_tests_properties(cucumber_cpp_runner.opt.cucumber.nonexistent PROPERTIES
 	PASS_REGULAR_EXPRESSION "Cucumber executable not found using 'non_existent_cucumber_exe'")
 
+
+#---------------------------------------------------------------------------------------------------
 # Invalid cucumber executable
 
 add_test(
@@ -136,6 +157,7 @@ add_test(
 )
 
 
+#---------------------------------------------------------------------------------------------------
 # Functions for more complex tests.
 
 # Create a simple fixture test in an isolate directory.
@@ -206,6 +228,7 @@ function(add_test_for_custom_target target_name)
 endfunction()
 
 
+#---------------------------------------------------------------------------------------------------
 # Symlink the .wire file
 
 add_custom_target(
@@ -228,6 +251,8 @@ list(APPEND _symlink_wire.fixtures
 add_custom_target_test_with_tmp_fixtures(
 	cucumber_cpp_runner.test.symlink_wire _symlink_wire.fixtures)
 
+
+#---------------------------------------------------------------------------------------------------
 # Invalid .wire specifying both unix path and tcp host
 
 add_custom_target(
@@ -257,6 +282,8 @@ set_tests_properties(
 	PASS_REGULAR_EXPRESSION "Both unix path .* and TCP host .* defined. Only one is supported"
 )
 
+
+#---------------------------------------------------------------------------------------------------
 # Unix socket
 
 add_custom_target(
@@ -288,6 +315,8 @@ if (WIN32)
 	)
 endif()
 
+
+#---------------------------------------------------------------------------------------------------
 # Invalid cucumber exe with unix socket
 
 add_custom_target(
