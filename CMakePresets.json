@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 6,
   "cmakeMinimumRequired": {
     "major": 3,
     "minor": 21,
@@ -10,7 +10,6 @@
       "name": "conf-common",
       "description": "General settings that apply to all configurations",
       "hidden": true,
-      "generator": "Ninja",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "installDir": "${sourceDir}/out/install/${presetName}"
     },
@@ -19,6 +18,7 @@
       "description": "Windows settings for MSBuild toolchain that apply to msvc and clang",
       "hidden": true,
       "inherits": "conf-common",
+      "generator": "Visual Studio 16 2019",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
@@ -38,6 +38,7 @@
       "description": "Unix-like OS settings for gcc and clang toolchains",
       "hidden": true,
       "inherits": "conf-common",
+      "generator": "Ninja Multi-Config",
       "condition": {
         "type": "inList",
         "string": "${hostSystemName}",
@@ -53,130 +54,180 @@
       }
     },
     {
-      "name": "windows-msvc-debug-developer-mode",
-      "displayName": "msvc Debug (Developer Mode)",
-      "description": "Target Windows with the msvc compiler, debug build type",
+      "name": "windows-msvc",
+      "displayName": "msvc",
+      "description": "Target Windows with the msvc compiler",
       "inherits": "conf-windows-common",
       "cacheVariables": {
         "CMAKE_C_COMPILER": "cl",
-        "CMAKE_CXX_COMPILER": "cl",
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_CXX_COMPILER": "cl"
       }
     },
     {
-      "name": "windows-msvc-release-developer-mode",
-      "displayName": "msvc Release (Developer Mode)",
-      "description": "Target Windows with the msvc compiler, release build type",
+      "name": "windows-clang",
+      "displayName": "clang",
+      "description": "Target Windows with the clang compiler",
       "inherits": "conf-windows-common",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "cl",
-        "CMAKE_CXX_COMPILER": "cl",
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+        "CMAKE_C_COMPILER": "clang-cl",
+        "CMAKE_CXX_COMPILER": "clang-cl"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "intelliSenseMode": "windows-clang-x64"
+        }
       }
     },
     {
-      "name": "windows-msvc-debug-user-mode",
-      "displayName": "msvc Debug (User Mode)",
-      "description": "Target Windows with the msvc compiler, debug build type",
-      "inherits": "conf-windows-common",
+      "name": "unixlike-gcc",
+      "displayName": "gcc",
+      "description": "Target Unix-like OS with the gcc compiler",
+      "inherits": "conf-unixlike-common",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "cl",
-        "CMAKE_CXX_COMPILER": "cl",
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
       }
     },
     {
-      "name": "windows-msvc-release-user-mode",
-      "displayName": "msvc Release (User Mode)",
-      "description": "Target Windows with the msvc compiler, release build type",
-      "inherits": "conf-windows-common",
+      "name": "unixlike-gcc-developer",
+      "displayName": "gcc dev mode",
+      "description": "Target Unix-like OS with the gcc compiler, linters enabled",
+      "inherits": "unixlike-gcc",
+      "warnings": {
+        "dev": true,
+        "uninitialized": true,
+        "systemVars": true,
+        "unusedCli": true
+      },
+      "errors": {
+        "dev": false,
+        "deprecated": true
+      },
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "cl",
-        "CMAKE_CXX_COMPILER": "cl",
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+        "cucumber_cpp_runner_ENABLE_DEVELOPER_DEFAULTS": "ON"
       }
+    },
+    {
+      "name": "unixlike-clang",
+      "displayName": "clang",
+      "description": "Target Unix-like OS with the clang compiler",
+      "inherits": "conf-unixlike-common",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "build-common",
+      "hidden": true,
+      "jobs": 0
+    },
+    {
+      "name": "windows-msvc-debug",
+      "inherits": "build-common",
+      "configurePreset": "windows-msvc",
+      "configuration": "Debug"
+    },
+    {
+      "name": "windows-msvc-debug-install",
+      "inherits": "windows-msvc-debug",
+      "targets": "install"
+    },
+    {
+      "name": "windows-msvc-release",
+      "inherits": "build-common",
+      "configurePreset": "windows-msvc",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-msvc-release-install",
+      "inherits": "windows-msvc-release",
+      "targets": "install"
     },
     {
       "name": "windows-clang-debug",
-      "displayName": "clang Debug",
-      "description": "Target Windows with the clang compiler, debug build type",
-      "inherits": "conf-windows-common",
-      "cacheVariables": {
-        "CMAKE_C_COMPILER": "clang-cl",
-        "CMAKE_CXX_COMPILER": "clang-cl",
-        "CMAKE_BUILD_TYPE": "Debug"
-      },
-      "vendor": {
-        "microsoft.com/VisualStudioSettings/CMake/1.0": {
-          "intelliSenseMode": "windows-clang-x64"
-        }
-      }
+      "inherits": "build-common",
+      "configurePreset": "windows-clang",
+      "configuration": "Debug"
+    },
+    {
+      "name": "windows-clang-debug-install",
+      "inherits": "windows-clang-debug",
+      "targets": "install"
     },
     {
       "name": "windows-clang-release",
-      "displayName": "clang Release",
-      "description": "Target Windows with the clang compiler, release build type",
-      "inherits": "conf-windows-common",
-      "cacheVariables": {
-        "CMAKE_C_COMPILER": "clang-cl",
-        "CMAKE_CXX_COMPILER": "clang-cl",
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
-      },
-      "vendor": {
-        "microsoft.com/VisualStudioSettings/CMake/1.0": {
-          "intelliSenseMode": "windows-clang-x64"
-        }
-      }
+      "inherits": "build-common",
+      "configurePreset": "windows-clang",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-clang-release-install",
+      "inherits": "windows-clang-release",
+      "targets": "install"
     },
     {
       "name": "unixlike-gcc-debug",
-      "displayName": "gcc Debug",
-      "description": "Target Unix-like OS with the gcc compiler, debug build type",
-      "inherits": "conf-unixlike-common",
-      "cacheVariables": {
-        "CMAKE_C_COMPILER": "gcc",
-        "CMAKE_CXX_COMPILER": "g++",
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
+      "inherits": "build-common",
+      "configurePreset": "unixlike-gcc",
+      "configuration": "Debug"
+    },
+    {
+      "name": "unixlike-gcc-debug-install",
+      "inherits": "unixlike-gcc-debug",
+      "targets": "install"
+    },
+    {
+      "name": "unixlike-gcc-developer",
+      "inherits": "build-common",
+      "configurePreset": "unixlike-gcc-developer",
+      "configuration": "Debug"
+    },
+    {
+      "name": "unixlike-gcc-developer-install",
+      "inherits": "unixlike-gcc-developer",
+      "targets": "install"
     },
     {
       "name": "unixlike-gcc-release",
-      "displayName": "gcc Release",
-      "description": "Target Unix-like OS with the gcc compiler, release build type",
-      "inherits": "conf-unixlike-common",
-      "cacheVariables": {
-        "CMAKE_C_COMPILER": "gcc",
-        "CMAKE_CXX_COMPILER": "g++",
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
-      }
+      "inherits": "build-common",
+      "configurePreset": "unixlike-gcc",
+      "configuration": "Release"
+    },
+    {
+      "name": "unixlike-gcc-release-install",
+      "inherits": "unixlike-gcc-release",
+      "targets": "install"
     },
     {
       "name": "unixlike-clang-debug",
-      "displayName": "clang Debug",
-      "description": "Target Unix-like OS with the clang compiler, debug build type",
-      "inherits": "conf-unixlike-common",
-      "cacheVariables": {
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
+      "inherits": "build-common",
+      "configurePreset": "unixlike-clang",
+      "configuration": "Debug"
+    },
+    {
+      "name": "unixlike-clang-debug-install",
+      "inherits": "unixlike-clang-debug",
+      "targets": "install"
     },
     {
       "name": "unixlike-clang-release",
-      "displayName": "clang Release",
-      "description": "Target Unix-like OS with the clang compiler, release build type",
-      "inherits": "conf-unixlike-common",
-      "cacheVariables": {
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
-      }
+      "inherits": "build-common",
+      "configurePreset": "unixlike-clang",
+      "configuration": "Release"
+    },
+    {
+      "name": "unixlike-clang-release-install",
+      "inherits": "unixlike-clang-release",
+      "targets": "install"
     }
   ],
   "testPresets": [
     {
       "name": "test-common",
-      "description": "Test CMake settings that apply to all configurations",
+      "description": "Enable output and stop on failure",
       "hidden": true,
       "output": {
         "outputOnFailure": true
@@ -187,60 +238,295 @@
       }
     },
     {
-      "name": "test-windows-msvc-debug-developer-mode",
-      "displayName": "Strict",
-      "description": "Enable output and stop on failure",
+      "name": "windows-msvc-debug",
       "inherits": "test-common",
-      "configurePreset": "windows-msvc-debug-developer-mode"
+      "configurePreset": "windows-msvc",
+      "configuration": "Debug"
     },
     {
-      "name": "test-windows-msvc-release-developer-mode",
-      "displayName": "Strict",
-      "description": "Enable output and stop on failure",
+      "name": "windows-msvc-release",
       "inherits": "test-common",
-      "configurePreset": "windows-msvc-release-developer-mode"
+      "configurePreset": "windows-msvc",
+      "configuration": "Release"
     },
     {
-      "name": "test-windows-clang-debug",
-      "displayName": "Strict",
-      "description": "Enable output and stop on failure",
+      "name": "windows-clang-debug",
       "inherits": "test-common",
-      "configurePreset": "windows-clang-debug"
+      "configurePreset": "windows-clang",
+      "configuration": "Debug"
     },
     {
-      "name": "test-windows-clang-release",
-      "displayName": "Strict",
-      "description": "Enable output and stop on failure",
+      "name": "windows-clang-release",
       "inherits": "test-common",
-      "configurePreset": "windows-clang-release"
+      "configurePreset": "windows-clang",
+      "configuration": "Release"
     },
     {
-      "name": "test-unixlike-gcc-debug",
-      "displayName": "Strict",
-      "description": "Enable output and stop on failure",
+      "name": "unixlike-gcc-debug",
       "inherits": "test-common",
-      "configurePreset": "unixlike-gcc-debug"
+      "configurePreset": "unixlike-gcc",
+      "configuration": "Debug"
     },
     {
-      "name": "test-unixlike-gcc-release",
-      "displayName": "Strict",
-      "description": "Enable output and stop on failure",
+      "name": "unixlike-gcc-developer",
       "inherits": "test-common",
-      "configurePreset": "unixlike-gcc-release"
+      "configurePreset": "unixlike-gcc-developer",
+      "configuration": "Debug"
     },
     {
-      "name": "test-unixlike-clang-debug",
-      "displayName": "Strict",
-      "description": "Enable output and stop on failure",
+      "name": "unixlike-gcc-release",
       "inherits": "test-common",
-      "configurePreset": "unixlike-clang-debug"
+      "configurePreset": "unixlike-gcc",
+      "configuration": "Release"
     },
     {
-      "name": "test-unixlike-clang-release",
-      "displayName": "Strict",
-      "description": "Enable output and stop on failure",
+      "name": "unixlike-clang-debug",
       "inherits": "test-common",
-      "configurePreset": "unixlike-clang-release"
+      "configurePreset": "unixlike-clang",
+      "configuration": "Debug"
+    },
+    {
+      "name": "unixlike-clang-release",
+      "inherits": "test-common",
+      "configurePreset": "unixlike-clang",
+      "configuration": "Release"
     }
+  ],
+  "workflowPresets": [
+    {
+      "name": "windows-msvc-debug",
+      "steps": [
+        {
+          "name": "windows-msvc",
+          "type": "configure"
+        },
+        {
+          "name": "windows-msvc-debug",
+          "type": "build"
+        }
+      ]
+    },
+    {
+      "name": "windows-msvc-release",
+      "steps": [
+        {
+          "name": "windows-msvc",
+          "type": "configure"
+        },
+        {
+          "name": "windows-msvc-release",
+          "type": "build"
+        }
+      ]
+    },
+    {
+      "name": "windows-clang-debug",
+      "steps": [
+        {
+          "name": "windows-clang",
+          "type": "configure"
+        },
+        {
+          "name": "windows-clang-debug",
+          "type": "build"
+        }
+      ]
+    },
+    {
+      "name": "windows-clang-release",
+      "steps": [
+        {
+          "name": "windows-clang",
+          "type": "configure"
+        },
+        {
+          "name": "windows-clang-release",
+          "type": "build"
+        }
+      ]
+    },
+    {
+      "name": "unixlike-gcc-debug",
+      "steps": [
+        {
+          "name": "unixlike-gcc",
+          "type": "configure"
+        },
+        {
+          "name": "unixlike-gcc-debug",
+          "type": "build"
+        }
+      ]
+    },
+    {
+      "name": "unixlike-gcc-developer",
+      "steps": [
+        {
+          "name": "unixlike-gcc-developer",
+          "type": "configure"
+        },
+        {
+          "name": "unixlike-gcc-developer",
+          "type": "build"
+        }
+      ]
+    },
+    {
+      "name": "unixlike-gcc-release",
+      "steps": [
+        {
+          "name": "unixlike-gcc",
+          "type": "configure"
+        },
+        {
+          "name": "unixlike-gcc-release",
+          "type": "build"
+        }
+      ]
+    },
+    {
+      "name": "unixlike-clang-debug",
+      "steps": [
+        {
+          "name": "unixlike-clang",
+          "type": "configure"
+        },
+        {
+          "name": "unixlike-clang-debug",
+          "type": "build"
+        }
+      ]
+    },
+    {
+      "name": "unixlike-clang-release",
+      "steps": [
+        {
+          "name": "unixlike-clang",
+          "type": "configure"
+        },
+        {
+          "name": "unixlike-clang-release",
+          "type": "build"
+        }
+      ]
+    },
+    {
+      "name": "windows-msvc-debug-install",
+      "steps": [
+        {
+          "name": "windows-msvc",
+          "type": "configure"
+        },
+        {
+          "name": "windows-msvc-debug-install",
+          "type": "build"
+        }
+      ]
+    },
+    {
+      "name": "windows-msvc-release-install",
+      "steps": [
+        {
+          "name": "windows-msvc",
+          "type": "configure"
+        },
+        {
+          "name": "windows-msvc-release-install",
+          "type": "build"
+        }
+      ]
+    },
+    {
+      "name": "windows-clang-debug-install",
+      "steps": [
+        {
+          "name": "windows-clang",
+          "type": "configure"
+        },
+        {
+          "name": "windows-clang-debug-install",
+          "type": "build"
+        }
+      ]
+    },
+    {
+      "name": "windows-clang-release-install",
+      "steps": [
+        {
+          "name": "windows-clang",
+          "type": "configure"
+        },
+        {
+          "name": "windows-clang-release-install",
+          "type": "build"
+        }
+      ]
+    },
+    {
+      "name": "unixlike-gcc-debug-install",
+      "steps": [
+        {
+          "name": "unixlike-gcc",
+          "type": "configure"
+        },
+        {
+          "name": "unixlike-gcc-debug-install",
+          "type": "build"
+        }
+      ]
+    },
+    {
+      "name": "unixlike-gcc-developer-install",
+      "steps": [
+        {
+          "name": "unixlike-gcc-developer",
+          "type": "configure"
+        },
+        {
+          "name": "unixlike-gcc-developer-install",
+          "type": "build"
+        }
+      ]
+    },
+    {
+      "name": "unixlike-gcc-release-install",
+      "steps": [
+        {
+          "name": "unixlike-gcc",
+          "type": "configure"
+        },
+        {
+          "name": "unixlike-gcc-release-install",
+          "type": "build"
+        }
+      ]
+    },
+    {
+      "name": "unixlike-clang-debug-install",
+      "steps": [
+        {
+          "name": "unixlike-clang",
+          "type": "configure"
+        },
+        {
+          "name": "unixlike-clang-debug-install",
+          "type": "build"
+        }
+      ]
+    },
+    {
+      "name": "unixlike-clang-release-install",
+      "steps": [
+        {
+          "name": "unixlike-clang",
+          "type": "configure"
+        },
+        {
+          "name": "unixlike-clang-release-install",
+          "type": "build"
+        }
+      ]
+    }    
+    
   ]
 }
