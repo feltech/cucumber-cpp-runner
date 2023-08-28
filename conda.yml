@@ -1,4 +1,3 @@
-name: gcc-latest
 channels:
   - conda-forge
   - defaults
@@ -30,4 +29,3 @@ dependencies:
   - cmake
   - conan==1.59
   - certifi
-prefix: /home/dave/.conda/envs/gcc-latest
