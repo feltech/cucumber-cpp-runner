@@ -52,7 +52,7 @@ Allowed options:
 # Get cucumber command-line client
 bundler install
 # Install dependencies not downloaded as part of build.
-conan install -of .conan 
+conan install -of .conan .
 export CMAKE_TOOLCHAIN_FILE=$(pwd)/.conan/conan_toolchain.cmake
 # Build then install to `out/install`. Can switch "gcc" for "clang"; and/or "release" for "debug";
 # and/or remove "-install".
@@ -81,10 +81,10 @@ Then:
 ```DOS
 : For non-admin non-polluting install (must set GEM_PATH and PATH, though).
 bundler install --binstubs --path .ruby
-set GEM_PATH=%CD%\.ruby\ruby\2.7.0;%PATH%
+set GEM_PATH=%CD%\.ruby\ruby\2.7.0
 set PATH=%CD%\.ruby\ruby\2.7.0\bin;%PATH%
 # Install dependencies not downloaded as part of build.
-conan install -of .conan 
+conan install -of .conan .
 set CMAKE_TOOLCHAIN_FILE=%CD%\.conan\conan_toolchain.cmake
 # Build then install to `out/install`. Can switch "msvc" for "clang"; and/or "release" for "debug";
 # and/or remove "-install".
