@@ -151,8 +151,8 @@ set_tests_properties(cucumber_cpp_runner.opt.cucumber.nonexistent PROPERTIES
 add_test(
 	NAME cucumber_cpp_runner.opt.cucumber.bad_exe
 	COMMAND
-	# If we have cucumber command line, then surely we have perl
-	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -v -c perl -o "--help"
+	# If we have cucumber command line, then surely we have ruby
+	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -v -c ruby -o "--help"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
