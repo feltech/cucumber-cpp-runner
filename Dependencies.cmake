@@ -43,54 +43,67 @@ function(cucumber_cpp_runner_cpm_install_package)
 	if (NOT DEFINED ${args_NAME}_CONFIG)
 		message(STATUS "${args_NAME} not found, downloading...")
 
-		set(build_type Release)
-		if (CMAKE_BUILD_TYPE)
-			set(build_type ${CMAKE_BUILD_TYPE})
-		endif ()
+		set(_build_type Release)
 
 		if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 			# Frustratingly, need to keep a list of warnings to disable, for annoying projects
 			# that force `-Werror` even for consumers (e.g. Cucumber-Cpp)
 			# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105329 (affects Cucumber-Cpp)
-			set(_compile_flags "-DCMAKE_CXX_FLAGS=-Wno-restrict -Wno-unknown-warning-option")
+			list(APPEND args_CMAKE_OPTIONS "-DCMAKE_CXX_FLAGS=-Wno-restrict -Wno-unknown-warning-option")
 		endif ()
 
-		execute_process(
-			COMMAND ${CMAKE_COMMAND}
-			-S ${${args_NAME}_SOURCE_DIR}
-			-B ${${args_NAME}_BINARY_DIR}
-			-G "${CMAKE_GENERATOR}"
-			--compile-no-warning-as-error
-			-DCMAKE_BUILD_TYPE=${build_type}
-			-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+		if (BUILD_SHARED_LIBS)
 			# In case we're linking a static library into a shared library.
-			-DCMAKE_POSITION_INDEPENDENT_CODE=$<IF:$<BOOL:${BUILD_SHARED_LIBS}>,ON,${CMAKE_POSITION_INDEPENDENT_CODE}>
+			list(APPEND args_CMAKE_OPTIONS -DCMAKE_POSITION_INDEPENDENT_CODE=ON)
+		elseif(DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
+			list(APPEND args_CMAKE_OPTIONS -DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE})
+		endif ()
+
+		if (CMAKE_PREFIX_PATH)
+			string(REPLACE ";" "$<SEMICOLON>"_prefix_path "${CMAKE_PREFIX_PATH}")
+			list(APPEND args_CMAKE_OPTIONS "-DCMAKE_PREFIX_PATH=${_prefix_path}")
+		endif ()
+
+		if (CMAKE_TOOLCHAIN_FILE)
 			# Pass along any toolchain file providing e.g. 3rd party libs via Conan.
-			-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+			list(APPEND args_CMAKE_OPTIONS "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}")
+		endif ()
+
+		list(APPEND args_CMAKE_OPTIONS
+			-S "${${args_NAME}_SOURCE_DIR}"
+			-B "${${args_NAME}_BINARY_DIR}"
+			-G "${CMAKE_GENERATOR}"
+			-DCMAKE_BUILD_TYPE=${_build_type}
+			--compile-no-warning-as-error
+			-DCMAKE_CXX_COMPILER="${CMAKE_CXX_COMPILER}"
 			# For MSVC and Conan v2
 			-DCMAKE_POLICY_DEFAULT_CMP0091=NEW
-			${_compile_flags}
+			# Allow `PackageName_ROOT` hint for find_package calls.
+			-DCMAKE_POLICY_DEFAULT_CMP0074=NEW
 			#			-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
 			-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
 			#			-DCMAKE_CXX_EXTENSIONS=${CMAKE_CXX_EXTENSIONS}
 			#			-DCMAKE_CXX_STANDARD_REQUIRED=${CMAKE_CXX_STANDARD_REQUIRED}
-			"-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
 			-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=TRUE
-			# Allow `PackageName_ROOT` hint for find_package calls.
-			-DCMAKE_POLICY_DEFAULT_CMP0074=NEW
+		)
+
+		message(TRACE "${args_NAME} options: ${args_CMAKE_OPTIONS}")
+
+		execute_process(
+			COMMAND ${CMAKE_COMMAND}
 			${args_CMAKE_OPTIONS}
 			COMMAND_ERROR_IS_FATAL ANY
 		)
 		execute_process(
 			COMMAND ${CMAKE_COMMAND}
-			--build ${${args_NAME}_BINARY_DIR} --config ${build_type} --parallel
+			--build ${${args_NAME}_BINARY_DIR} --config ${_build_type} --parallel
 			COMMAND_ERROR_IS_FATAL ANY
 		)
 		execute_process(
 			COMMAND ${CMAKE_COMMAND}
 			--install ${${args_NAME}_BINARY_DIR}
 			--prefix ${cucumber_cpp_runner_DEPENDENCY_INSTALL_CACHE_DIR}
-			--config ${build_type}
+			--config ${_build_type}
 			COMMAND_ERROR_IS_FATAL ANY
 		)
 		find_package(
