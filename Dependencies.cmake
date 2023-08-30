@@ -63,7 +63,12 @@ function(cucumber_cpp_runner_cpm_install_package)
 			--compile-no-warning-as-error
 			-DCMAKE_BUILD_TYPE=${build_type}
 			-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-			-DCMAKE_POSITION_INDEPENDENT_CODE=ON
+			# In case we're linking a static library into a shared library.
+			-DCMAKE_POSITION_INDEPENDENT_CODE=$<IF:$<BOOL:${BUILD_SHARED_LIBS}>,ON,${CMAKE_POSITION_INDEPENDENT_CODE}>
+			# Pass along any toolchain file providing e.g. 3rd party libs via Conan.
+			-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+			# For MSVC and Conan v2
+			-DCMAKE_POLICY_DEFAULT_CMP0091=NEW
 			${_compile_flags}
 			#			-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
 			-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
@@ -130,8 +135,6 @@ function(cucumber_cpp_runner_setup_dependencies)
 			-DCUKE_ENABLE_QT=OFF
 			-DCUKE_TESTS_E2E=OFF
 			-DCUKE_TESTS_UNIT=OFF
-			-DBoost_ROOT=${Boost_DIR}
-			-DCMAKE_VERBOSE_MAKEFILE=ON
 		)
 
 		# Pass along any external override to Boost static vs. shared.
