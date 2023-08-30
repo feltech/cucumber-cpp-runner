@@ -58,6 +58,9 @@ if (cucumber_cpp_runner_ENABLE_TESTS)
 	enable_testing()
 	message(STATUS "Enabling test targets")
 	add_subdirectory(test)
+
+	# set the startup project for the "play" button in MSVC
+	set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT cucumber_cpp_runner.test)
 endif ()
 
 # If MSVC is being used, and ASAN is enabled, we need to set the debugger environment
@@ -67,9 +70,6 @@ if (MSVC)
 	message("all_targets=${all_targets}")
 	set_target_properties(${all_targets} PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=$(VC_ExecutablePath_x64);%PATH%")
 endif ()
-
-# set the startup project for the "play" button in MSVC
-set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT intro)
 
 if (CMAKE_SKIP_INSTALL_RULES)
 	return()
