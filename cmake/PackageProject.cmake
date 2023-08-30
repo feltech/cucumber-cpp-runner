@@ -4,8 +4,6 @@ cmake_policy(SET CMP0135 NEW)
 function(cucumber_cpp_runner_package_project)
 	cmake_policy(SET CMP0103 NEW) # disallow multiple calls with the same NAME
 
-	set(_options ARCH_INDEPENDENT # default to false
-	)
 	set(_oneValueArgs
 		# default to the project_name:
 		NAME
@@ -74,11 +72,9 @@ function(cucumber_cpp_runner_package_project)
 	endif ()
 	set(_PackageProject_EXPORT_DESTINATION "${_PackageProject_CONFIG_EXPORT_DESTINATION}")
 
-	# use datadir (works better with vcpkg, etc)
 	if ("${_PackageProject_CONFIG_INSTALL_DESTINATION}" STREQUAL "")
-		set(_PackageProject_CONFIG_INSTALL_DESTINATION "${CMAKE_INSTALL_DATADIR}/${_PackageProject_NAME}")
+		set(_PackageProject_CONFIG_INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/${_PackageProject_NAME}")
 	endif ()
-	# ycm args
 	set(_PackageProject_INSTALL_DESTINATION "${_PackageProject_CONFIG_INSTALL_DESTINATION}")
 
 	# Installation of the public/interface includes
@@ -137,7 +133,7 @@ function(cucumber_cpp_runner_package_project)
 		RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT bin
 		PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${_PackageProject_NAME}" COMPONENT dev)
 
-	# install the usage file
+	# Install the usage file
 	set(_targets_str "")
 	foreach (_target ${_PackageProject_TARGETS})
 		set(_targets_str "${_targets_str} ${_PackageProject_NAMESPACE}${_target}")
