@@ -112,7 +112,7 @@ jobs:
           cmake -S . -B ./build -G "${{matrix.build.generator}}" 
           -DBUILD_SHARED_LIBS=${{ matrix.build_shared }} 
           -D${{ env.PROJECT_NAME }}_ENABLE_TESTS=ON
-          -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{ matrix.enabddle_ipo }} 
+          -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{ matrix.enable_ipo }} 
           -DCMAKE_BUILD_TYPE:STRING=${{ matrix.build_type}} 
           -DGIT_SHA:STRING=${{ github.sha }}
         env:
