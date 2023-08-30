@@ -26,15 +26,6 @@ function(cucumber_cpp_runner_cpm_install_package)
 
 	list(APPEND CMAKE_PREFIX_PATH ${cucumber_cpp_runner_DEPENDENCY_INSTALL_CACHE_DIR})
 
-	CPMAddPackage(
-		NAME ${args_NAME}
-		SYSTEM YES
-		EXCLUDE_FROM_ALL YES
-		DOWNLOAD_ONLY YES
-		GIT_TAG ${args_GIT_TAG}
-		GITHUB_REPOSITORY ${args_GITHUB_REPOSITORY}
-	)
-
 	find_package(
 		${args_NAME} CONFIG
 		PATHS ${cucumber_cpp_runner_DEPENDENCY_INSTALL_CACHE_DIR}
@@ -42,6 +33,15 @@ function(cucumber_cpp_runner_cpm_install_package)
 	)
 	if (NOT DEFINED ${args_NAME}_CONFIG)
 		message(STATUS "${args_NAME} not found, downloading...")
+
+		CPMAddPackage(
+			NAME ${args_NAME}
+			SYSTEM YES
+			EXCLUDE_FROM_ALL YES
+			DOWNLOAD_ONLY YES
+			GIT_TAG ${args_GIT_TAG}
+			GITHUB_REPOSITORY ${args_GITHUB_REPOSITORY}
+		)
 
 		set(_build_type Release)
 
