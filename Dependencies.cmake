@@ -75,7 +75,7 @@ function(cucumber_cpp_runner_cpm_install_package)
 			-G "${CMAKE_GENERATOR}"
 			-DCMAKE_BUILD_TYPE=${_build_type}
 			--compile-no-warning-as-error
-			-DCMAKE_CXX_COMPILER="${CMAKE_CXX_COMPILER}"
+			"-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
 			# For MSVC and Conan v2
 			-DCMAKE_POLICY_DEFAULT_CMP0091=NEW
 			# Allow `PackageName_ROOT` hint for find_package calls.
