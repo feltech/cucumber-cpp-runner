@@ -4,7 +4,7 @@
 
 #include <fmt/printf.h>
 
-#include <cucumber_cpp_runner/cucumber_cpp_runner.hpp>
+#include <cucumber-cpp-runner/cucumber_cpp_runner.hpp>
 
 int main()
 {

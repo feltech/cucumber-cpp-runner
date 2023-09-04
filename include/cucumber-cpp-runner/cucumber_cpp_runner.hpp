@@ -1,5 +1,5 @@
 #pragma once
-#include <cucumber_cpp_runner/cucumber_cpp_runner_export.hpp>
+#include <cucumber-cpp-runner/cucumber_cpp_runner_export.hpp>
 
 #include <boost/filesystem/path.hpp>
 

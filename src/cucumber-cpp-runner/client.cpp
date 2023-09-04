@@ -8,6 +8,7 @@
 
 #include <boost/process.hpp>
 #include <fmt/format.h>
+#include <fmt/ostream.h>
 
 namespace cucumber_cpp_runner
 {

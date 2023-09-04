@@ -15,10 +15,10 @@ endif ()
 
 # Set the project name and language
 project(
-	cucumber_cpp_runner
+	CucumberCppRunner
 	VERSION 1.0.0
-	DESCRIPTION ""
-	HOMEPAGE_URL "https://github.com/feltech/cucumber_cpp_runner"
+	DESCRIPTION "Execute C++ Gherkin tests with both client and server in a single main"
+	HOMEPAGE_URL "https://github.com/feltech/cucumber-cpp-runner"
 	LANGUAGES CXX C)
 
 include(cmake/PreventInSourceBuilds.cmake)
@@ -40,12 +40,12 @@ include(Dependencies.cmake)
 cucumber_cpp_runner_setup_dependencies()
 cucumber_cpp_runner_local_options()
 
-target_compile_features(cucumber_cpp_runner_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
-add_library(cucumber_cpp_runner::cucumber_cpp_runner_options ALIAS cucumber_cpp_runner_options)
-add_library(cucumber_cpp_runner::cucumber_cpp_runner_warnings ALIAS cucumber_cpp_runner_warnings)
+target_compile_features(cucumber-cpp-runner-options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
+add_library(CucumberCppRunner::cucumber-cpp-runner-options ALIAS cucumber-cpp-runner-options)
+add_library(CucumberCppRunner::cucumber-cpp-runner-warnings ALIAS cucumber-cpp-runner-warnings)
 
-#add_library(cucumber_cpp_runner::cucumber_cpp_runner_options INTERFACE IMPORTED)
-#add_library(cucumber_cpp_runner::cucumber_cpp_runner_warnings INTERFACE IMPORTED)
+#add_library(CucumberCppRunner::cucumber-cpp-runner-options INTERFACE IMPORTED)
+#add_library(CucumberCppRunner::cucumber-cpp-runner-warnings INTERFACE IMPORTED)
 
 # Adding the src:
 add_subdirectory(src)
@@ -61,7 +61,7 @@ if (cucumber_cpp_runner_ENABLE_TESTS)
 	add_subdirectory(test)
 
 	# set the startup project for the "play" button in MSVC
-	set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT cucumber_cpp_runner.test)
+	set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT cucumber-cpp-runner.test)
 endif ()
 
 # If MSVC is being used, and ASAN is enabled, we need to set the debugger environment
@@ -82,10 +82,10 @@ include(cmake/PackageProject.cmake)
 # we know we want to ship
 cucumber_cpp_runner_package_project(
 	TARGETS
-	cucumber_cpp_runner
-	cucumber_cpp_runner_nomain
-	cucumber_cpp_runner_options
-	cucumber_cpp_runner_warnings
+	cucumber-cpp-runner
+	cucumber-cpp-runner-nomain
+	cucumber-cpp-runner-options
+	cucumber-cpp-runner-warnings
 )
 
 # GIT_SHORT_SHA is provided externally, e.g. by CI build.

@@ -1,7 +1,7 @@
 /**
  * Taken and modified from CucumberCpp main.
  */
-#include <cucumber_cpp_runner/cucumber_cpp_runner.hpp>
+#include <cucumber-cpp-runner/cucumber_cpp_runner.hpp>
 
 #include <boost/filesystem.hpp>
 

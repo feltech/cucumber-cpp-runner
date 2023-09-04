@@ -5,9 +5,9 @@ project(CmakeConfigPackageTests LANGUAGES CXX)
 if (PROJECT_IS_TOP_LEVEL OR TEST_INSTALLED_VERSION)
 	enable_testing()
 
-	find_package(cucumber_cpp_runner CONFIG REQUIRED)
+	find_package(cucumber-cpp-runner CONFIG REQUIRED)
 
-	if (NOT TARGET cucumber_cpp_runner_options)
+	if (NOT TARGET cucumber-cpp-runner-options)
 		message(FATAL_ERROR "Required config package not found!")
 		return()
 	endif ()
@@ -18,15 +18,15 @@ endif ()
 # Simple cucumber test executable/server wrapper
 
 add_executable(
-	cucumber_cpp_runner.test
+	cucumber-cpp-runner.test
 	src/features/step_definitions/test.cpp
 )
 
 target_link_libraries(
-	cucumber_cpp_runner.test
+	cucumber-cpp-runner.test
 	PRIVATE
-	cucumber_cpp_runner::cucumber_cpp_runner
-	cucumber_cpp_runner::cucumber_cpp_runner_options
+	CucumberCppRunner::cucumber-cpp-runner
+	CucumberCppRunner::cucumber-cpp-runner-options
 )
 
 
@@ -34,16 +34,16 @@ target_link_libraries(
 # Default happy path.
 
 add_test(
-	NAME cucumber_cpp_runner.default.exit_code
-	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test>
+	NAME cucumber-cpp-runner.default.exit_code
+	COMMAND $<TARGET_FILE:cucumber-cpp-runner.test>
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 add_test(
-	NAME cucumber_cpp_runner.default.content
-	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test>
+	NAME cucumber-cpp-runner.default.content
+	COMMAND $<TARGET_FILE:cucumber-cpp-runner.test>
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-set_tests_properties(cucumber_cpp_runner.default.content PROPERTIES
+set_tests_properties(cucumber-cpp-runner.default.content PROPERTIES
 	PASS_REGULAR_EXPRESSION "2 scenarios \\(2 passed\\)")
 
 
@@ -51,21 +51,21 @@ set_tests_properties(cucumber_cpp_runner.default.content PROPERTIES
 # Help text
 
 add_test(
-	NAME cucumber_cpp_runner.opt.help
-	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -h
+	NAME cucumber-cpp-runner.opt.help
+	COMMAND $<TARGET_FILE:cucumber-cpp-runner.test> -h
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-set_tests_properties(cucumber_cpp_runner.opt.help PROPERTIES
+set_tests_properties(cucumber-cpp-runner.opt.help PROPERTIES
 	PASS_REGULAR_EXPRESSION "Allowed options")
 
 # Verbose mode
 
 add_test(
-	NAME cucumber_cpp_runner.opt.verbose
-	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -v
+	NAME cucumber-cpp-runner.opt.verbose
+	COMMAND $<TARGET_FILE:cucumber-cpp-runner.test> -v
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-set_tests_properties(cucumber_cpp_runner.opt.verbose PROPERTIES
+set_tests_properties(cucumber-cpp-runner.opt.verbose PROPERTIES
 	PASS_REGULAR_EXPRESSION "Listening on")
 
 
@@ -73,8 +73,8 @@ set_tests_properties(cucumber_cpp_runner.opt.verbose PROPERTIES
 # Specifying feature directory from outside of feature tree.
 
 add_test(
-	NAME cucumber_cpp_runner.opt.features.dir
-	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -v -o "--strict"
+	NAME cucumber-cpp-runner.opt.features.dir
+	COMMAND $<TARGET_FILE:cucumber-cpp-runner.test> -v -o "--strict"
 	-f ${CMAKE_CURRENT_SOURCE_DIR}/src
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
@@ -84,12 +84,12 @@ add_test(
 # Specifying a particular feature file from outside of feature tree.
 
 add_test(
-	NAME cucumber_cpp_runner.opt.features.file
-	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -v -o "--strict"
+	NAME cucumber-cpp-runner.opt.features.file
+	COMMAND $<TARGET_FILE:cucumber-cpp-runner.test> -v -o "--strict"
 	-f ${CMAKE_CURRENT_SOURCE_DIR}/src/features/test1.feature
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
-set_tests_properties(cucumber_cpp_runner.opt.features.file PROPERTIES
+set_tests_properties(cucumber-cpp-runner.opt.features.file PROPERTIES
 	FAIL_REGULAR_EXPRESSION "this second feature"
 )
 
@@ -98,12 +98,12 @@ set_tests_properties(cucumber_cpp_runner.opt.features.file PROPERTIES
 # Specifying invalid feature directory
 
 add_test(
-	NAME cucumber_cpp_runner.opt.features.bad
-	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -v -o "-v --strict"
+	NAME cucumber-cpp-runner.opt.features.bad
+	COMMAND $<TARGET_FILE:cucumber-cpp-runner.test> -v -o "-v --strict"
 	-f ${CMAKE_CURRENT_BINARY_DIR}
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-set_tests_properties(cucumber_cpp_runner.opt.features.bad PROPERTIES
+set_tests_properties(cucumber-cpp-runner.opt.features.bad PROPERTIES
 	PASS_REGULAR_EXPRESSION "wire file not found in directory tree '${CMAKE_CURRENT_BINARY_DIR}'")
 
 
@@ -111,11 +111,11 @@ set_tests_properties(cucumber_cpp_runner.opt.features.bad PROPERTIES
 # Passing additional options to the `cucumber` command line.
 
 add_test(
-	NAME cucumber_cpp_runner.opt.options
-	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -v -o "--dry-run"
+	NAME cucumber-cpp-runner.opt.options
+	COMMAND $<TARGET_FILE:cucumber-cpp-runner.test> -v -o "--dry-run"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-set_tests_properties(cucumber_cpp_runner.opt.options PROPERTIES
+set_tests_properties(cucumber-cpp-runner.opt.options PROPERTIES
 	PASS_REGULAR_EXPRESSION "2 scenarios \\(2 skipped\\)")
 
 
@@ -126,9 +126,9 @@ set_tests_properties(cucumber_cpp_runner.opt.options PROPERTIES
 find_program(_cucumber_exe_path NAMES cucumber.bat cucumber REQUIRED)
 cmake_path(NATIVE_PATH _cucumber_exe_path _cucumber_exe_path_native)
 add_test(
-	NAME cucumber_cpp_runner.opt.cucumber
+	NAME cucumber-cpp-runner.opt.cucumber
 	COMMAND
-	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -c ${_cucumber_exe_path_native}
+	COMMAND $<TARGET_FILE:cucumber-cpp-runner.test> -c ${_cucumber_exe_path_native}
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
@@ -137,11 +137,11 @@ add_test(
 # Passing an nonexistent custom `cucumber` executable.
 
 add_test(
-	NAME cucumber_cpp_runner.opt.cucumber.nonexistent
-	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -c non_existent_cucumber_exe
+	NAME cucumber-cpp-runner.opt.cucumber.nonexistent
+	COMMAND $<TARGET_FILE:cucumber-cpp-runner.test> -c non_existent_cucumber_exe
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-set_tests_properties(cucumber_cpp_runner.opt.cucumber.nonexistent PROPERTIES
+set_tests_properties(cucumber-cpp-runner.opt.cucumber.nonexistent PROPERTIES
 	PASS_REGULAR_EXPRESSION "Cucumber executable not found using 'non_existent_cucumber_exe'")
 
 
@@ -149,10 +149,10 @@ set_tests_properties(cucumber_cpp_runner.opt.cucumber.nonexistent PROPERTIES
 # Invalid cucumber executable
 
 add_test(
-	NAME cucumber_cpp_runner.opt.cucumber.bad_exe
+	NAME cucumber-cpp-runner.opt.cucumber.bad_exe
 	COMMAND
 	# If we have cucumber command line, then surely we have ruby
-	COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> -v -c ruby -o "--help"
+	COMMAND $<TARGET_FILE:cucumber-cpp-runner.test> -v -c ruby -o "--help"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
@@ -211,10 +211,10 @@ endfunction()
 function(add_custom_target_test target_name)
 	add_custom_target(
 		${target_name}
-		COMMAND $<TARGET_FILE:cucumber_cpp_runner.test> ${ARGN}
+		COMMAND $<TARGET_FILE:cucumber-cpp-runner.test> ${ARGN}
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${target_name}
 	)
-	add_dependencies(${target_name} cucumber_cpp_runner.test)
+	add_dependencies(${target_name} cucumber-cpp-runner.test)
 	add_test_for_custom_target(${target_name})
 endfunction()
 
@@ -232,52 +232,52 @@ endfunction()
 # Symlink the .wire file
 
 add_custom_target(
-	cucumber_cpp_runner.test.symlink_wire.setup.wire
+	cucumber-cpp-runner.test.symlink_wire.setup.wire
 	COMMAND
 	${CMAKE_COMMAND} -E $<IF:$<BOOL:${WIN32}>,copy,create_symlink>
 	${CMAKE_CURRENT_SOURCE_DIR}/src/features/step_definitions/cucumber.wire
-	${CMAKE_CURRENT_BINARY_DIR}/cucumber_cpp_runner.test.symlink_wire/features/step_definitions/cucumber.wire
+	${CMAKE_CURRENT_BINARY_DIR}/cucumber-cpp-runner.test.symlink_wire/features/step_definitions/cucumber.wire
 )
-add_test_for_custom_target(cucumber_cpp_runner.test.symlink_wire.setup.wire)
+add_test_for_custom_target(cucumber-cpp-runner.test.symlink_wire.setup.wire)
 set_tests_properties(
-	cucumber_cpp_runner.test.symlink_wire.setup.wire
+	cucumber-cpp-runner.test.symlink_wire.setup.wire
 	PROPERTIES
-	FIXTURES_SETUP cucumber_cpp_runner.test.symlink_wire.setup.wire
-	FIXTURES_REQUIRED cucumber_cpp_runner.test.symlink_wire.setup.feature
+	FIXTURES_SETUP cucumber-cpp-runner.test.symlink_wire.setup.wire
+	FIXTURES_REQUIRED cucumber-cpp-runner.test.symlink_wire.setup.feature
 )
 list(APPEND _symlink_wire.fixtures
-	cucumber_cpp_runner.test.symlink_wire.setup.wire)
+	cucumber-cpp-runner.test.symlink_wire.setup.wire)
 
 add_custom_target_test_with_tmp_fixtures(
-	cucumber_cpp_runner.test.symlink_wire _symlink_wire.fixtures)
+	cucumber-cpp-runner.test.symlink_wire _symlink_wire.fixtures)
 
 
 #---------------------------------------------------------------------------------------------------
 # Invalid .wire specifying both unix path and tcp host
 
 add_custom_target(
-	cucumber_cpp_runner.test.bad_wire_tcp_and_unix.setup.wire
+	cucumber-cpp-runner.test.bad_wire_tcp_and_unix.setup.wire
 	COMMAND
 	${CMAKE_COMMAND} -E copy
 	${CMAKE_CURRENT_SOURCE_DIR}/resources/bad_wire_tcp_and_unix.wire
-	${CMAKE_CURRENT_BINARY_DIR}/cucumber_cpp_runner.test.bad_wire_tcp_and_unix/features/step_definitions/cucumber.wire
+	${CMAKE_CURRENT_BINARY_DIR}/cucumber-cpp-runner.test.bad_wire_tcp_and_unix/features/step_definitions/cucumber.wire
 )
-add_test_for_custom_target(cucumber_cpp_runner.test.bad_wire_tcp_and_unix.setup.wire)
+add_test_for_custom_target(cucumber-cpp-runner.test.bad_wire_tcp_and_unix.setup.wire)
 
 list(APPEND _bad_wire_tcp_and_unix.fixtures
-	cucumber_cpp_runner.test.bad_wire_tcp_and_unix.setup.wire)
+	cucumber-cpp-runner.test.bad_wire_tcp_and_unix.setup.wire)
 
 add_custom_target_test_with_tmp_fixtures(
-	cucumber_cpp_runner.test.bad_wire_tcp_and_unix _bad_wire_tcp_and_unix.fixtures)
+	cucumber-cpp-runner.test.bad_wire_tcp_and_unix _bad_wire_tcp_and_unix.fixtures)
 
 set_tests_properties(
-	cucumber_cpp_runner.test.bad_wire_tcp_and_unix.setup.wire
+	cucumber-cpp-runner.test.bad_wire_tcp_and_unix.setup.wire
 	PROPERTIES
-	FIXTURES_SETUP cucumber_cpp_runner.test.bad_wire_tcp_and_unix.setup.wire
-	FIXTURES_REQUIRED cucumber_cpp_runner.test.bad_wire_tcp_and_unix.setup.feature
+	FIXTURES_SETUP cucumber-cpp-runner.test.bad_wire_tcp_and_unix.setup.wire
+	FIXTURES_REQUIRED cucumber-cpp-runner.test.bad_wire_tcp_and_unix.setup.feature
 )
 set_tests_properties(
-	cucumber_cpp_runner.test.bad_wire_tcp_and_unix
+	cucumber-cpp-runner.test.bad_wire_tcp_and_unix
 	PROPERTIES
 	PASS_REGULAR_EXPRESSION "Both unix path .* and TCP host .* defined. Only one is supported"
 )
@@ -287,29 +287,29 @@ set_tests_properties(
 # Unix socket
 
 add_custom_target(
-	cucumber_cpp_runner.test.unix_wire.setup.wire
+	cucumber-cpp-runner.test.unix_wire.setup.wire
 	COMMAND
 	${CMAKE_COMMAND} -E copy
 	${CMAKE_CURRENT_SOURCE_DIR}/resources/unix.wire
-	${CMAKE_CURRENT_BINARY_DIR}/cucumber_cpp_runner.test.unix_wire/features/step_definitions/cucumber.wire
+	${CMAKE_CURRENT_BINARY_DIR}/cucumber-cpp-runner.test.unix_wire/features/step_definitions/cucumber.wire
 )
-add_test_for_custom_target(cucumber_cpp_runner.test.unix_wire.setup.wire)
+add_test_for_custom_target(cucumber-cpp-runner.test.unix_wire.setup.wire)
 set_tests_properties(
-	cucumber_cpp_runner.test.unix_wire.setup.wire
+	cucumber-cpp-runner.test.unix_wire.setup.wire
 	PROPERTIES
-	FIXTURES_SETUP cucumber_cpp_runner.test.unix_wire.setup.wire
-	FIXTURES_REQUIRED cucumber_cpp_runner.test.unix_wire.setup.feature
+	FIXTURES_SETUP cucumber-cpp-runner.test.unix_wire.setup.wire
+	FIXTURES_REQUIRED cucumber-cpp-runner.test.unix_wire.setup.feature
 )
 list(APPEND _unix_wire.fixtures
-	cucumber_cpp_runner.test.unix_wire.setup.wire)
+	cucumber-cpp-runner.test.unix_wire.setup.wire)
 
 add_custom_target_test_with_tmp_fixtures(
-	cucumber_cpp_runner.test.unix_wire _unix_wire.fixtures)
+	cucumber-cpp-runner.test.unix_wire _unix_wire.fixtures)
 
 if (WIN32)
 	# Unix path unsupported on Windows
 	set_tests_properties(
-		cucumber_cpp_runner.test.unix_wire
+		cucumber-cpp-runner.test.unix_wire
 		PROPERTIES
 		PASS_REGULAR_EXPRESSION "Unix paths are unsupported on this system"
 	)
@@ -320,24 +320,24 @@ endif()
 # Invalid cucumber exe with unix socket
 
 add_custom_target(
-	cucumber_cpp_runner.test.unix_wire_invalid_cucumber.setup.wire
+	cucumber-cpp-runner.test.unix_wire_invalid_cucumber.setup.wire
 	COMMAND
 	${CMAKE_COMMAND} -E copy
 	${CMAKE_CURRENT_SOURCE_DIR}/resources/unix.wire
-	${CMAKE_CURRENT_BINARY_DIR}/cucumber_cpp_runner.test.unix_wire_invalid_cucumber/features/step_definitions/cucumber.wire
+	${CMAKE_CURRENT_BINARY_DIR}/cucumber-cpp-runner.test.unix_wire_invalid_cucumber/features/step_definitions/cucumber.wire
 )
-add_test_for_custom_target(cucumber_cpp_runner.test.unix_wire_invalid_cucumber.setup.wire)
+add_test_for_custom_target(cucumber-cpp-runner.test.unix_wire_invalid_cucumber.setup.wire)
 set_tests_properties(
-	cucumber_cpp_runner.test.unix_wire_invalid_cucumber.setup.wire
+	cucumber-cpp-runner.test.unix_wire_invalid_cucumber.setup.wire
 	PROPERTIES
-	FIXTURES_SETUP cucumber_cpp_runner.test.unix_wire_invalid_cucumber.setup.wire
-	FIXTURES_REQUIRED cucumber_cpp_runner.test.unix_wire_invalid_cucumber.setup.feature
+	FIXTURES_SETUP cucumber-cpp-runner.test.unix_wire_invalid_cucumber.setup.wire
+	FIXTURES_REQUIRED cucumber-cpp-runner.test.unix_wire_invalid_cucumber.setup.feature
 )
 list(APPEND _unix_wire_invalid_cucumber.fixtures
-	cucumber_cpp_runner.test.unix_wire_invalid_cucumber.setup.wire)
+	cucumber-cpp-runner.test.unix_wire_invalid_cucumber.setup.wire)
 
 add_custom_target_test_with_tmp_fixtures(
-	cucumber_cpp_runner.test.unix_wire_invalid_cucumber
+	cucumber-cpp-runner.test.unix_wire_invalid_cucumber
 	_unix_wire_invalid_cucumber.fixtures
 	-v -c ruby -o "--help"
 )
@@ -345,7 +345,7 @@ add_custom_target_test_with_tmp_fixtures(
 if (WIN32)
 	# Unix path unsupported on Windows
 	set_tests_properties(
-		cucumber_cpp_runner.test.unix_wire_invalid_cucumber
+		cucumber-cpp-runner.test.unix_wire_invalid_cucumber
 		PROPERTIES
 		PASS_REGULAR_EXPRESSION "Unix paths are unsupported on this system"
 	)
@@ -356,35 +356,35 @@ endif ()
 # Custom main
 
 add_executable(
-	cucumber_cpp_runner.test.nomain
+	cucumber-cpp-runner.test.nomain
 	src/features/step_definitions/test.cpp
 	src/custom_main.cpp
 )
 
 target_link_libraries(
-	cucumber_cpp_runner.test.nomain
+	cucumber-cpp-runner.test.nomain
 	PRIVATE
-	cucumber_cpp_runner::cucumber_cpp_runner_nomain
-	cucumber_cpp_runner::cucumber_cpp_runner_options
+	CucumberCppRunner::cucumber-cpp-runner-nomain
+	CucumberCppRunner::cucumber-cpp-runner-options
 )
 
 add_test(
-	NAME cucumber_cpp_runner.nomain.exit_code
-	COMMAND cucumber_cpp_runner.test.nomain
+	NAME cucumber-cpp-runner.nomain.exit_code
+	COMMAND cucumber-cpp-runner.test.nomain
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 add_test(
-	NAME cucumber_cpp_runner.nomain.content
-	COMMAND cucumber_cpp_runner.test.nomain
+	NAME cucumber-cpp-runner.nomain.content
+	COMMAND cucumber-cpp-runner.test.nomain
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-set_tests_properties(cucumber_cpp_runner.nomain.content PROPERTIES
+set_tests_properties(cucumber-cpp-runner.nomain.content PROPERTIES
 	PASS_REGULAR_EXPRESSION "2 scenarios \\(2 passed\\)")
 
 add_test(
-	NAME cucumber_cpp_runner.nomain.error
-	COMMAND cucumber_cpp_runner.test.nomain
+	NAME cucumber-cpp-runner.nomain.error
+	COMMAND cucumber-cpp-runner.test.nomain
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
-set_tests_properties(cucumber_cpp_runner.nomain.error PROPERTIES
+set_tests_properties(cucumber-cpp-runner.nomain.error PROPERTIES
 	PASS_REGULAR_EXPRESSION "Failed custom main: .wire file not found in directory tree '.'")

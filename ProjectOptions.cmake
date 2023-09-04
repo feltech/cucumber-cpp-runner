@@ -41,7 +41,7 @@ macro(cucumber_cpp_runner_setup_options)
 
 	if (NOT cucumber_cpp_runner_ENABLE_DEVELOPER_DEFAULTS)
 		option(cucumber_cpp_runner_ENABLE_TESTS "Enable test targets" OFF)
-		option(cucumber_cpp_runner_WARNINGS_AS_ERRORS "Treat Warnings As Errors" OFF)
+		option(cucumber-cpp-runner-WARNINGS_AS_ERRORS "Treat Warnings As Errors" OFF)
 		option(cucumber_cpp_runner_ENABLE_USER_LINKER "Enable user-selected linker" OFF)
 		option(cucumber_cpp_runner_ENABLE_SANITIZER_ADDRESS "Enable address sanitizer" OFF)
 		option(cucumber_cpp_runner_ENABLE_SANITIZER_LEAK "Enable leak sanitizer" OFF)
@@ -55,7 +55,7 @@ macro(cucumber_cpp_runner_setup_options)
 		option(cucumber_cpp_runner_ENABLE_PCH "Enable precompiled headers" OFF)
 	else ()
 		option(cucumber_cpp_runner_ENABLE_TESTS "Enable test targets" ON)
-		option(cucumber_cpp_runner_WARNINGS_AS_ERRORS "Treat Warnings As Errors" ON)
+		option(cucumber-cpp-runner-WARNINGS_AS_ERRORS "Treat Warnings As Errors" ON)
 		option(cucumber_cpp_runner_ENABLE_USER_LINKER "Enable user-selected linker" OFF)
 		option(cucumber_cpp_runner_ENABLE_SANITIZER_ADDRESS "Enable address sanitizer" ${SUPPORTS_ASAN})
 		option(cucumber_cpp_runner_ENABLE_SANITIZER_LEAK "Enable leak sanitizer" OFF)
@@ -72,7 +72,7 @@ macro(cucumber_cpp_runner_setup_options)
 	if (NOT PROJECT_IS_TOP_LEVEL)
 		mark_as_advanced(
 			cucumber_cpp_runner_ENABLE_IPO
-			cucumber_cpp_runner_WARNINGS_AS_ERRORS
+			cucumber-cpp-runner-WARNINGS_AS_ERRORS
 			cucumber_cpp_runner_ENABLE_USER_LINKER
 			cucumber_cpp_runner_ENABLE_SANITIZER_ADDRESS
 			cucumber_cpp_runner_ENABLE_SANITIZER_LEAK
@@ -116,7 +116,7 @@ macro(cucumber_cpp_runner_global_options)
 			set(ENABLE_UBSAN_MINIMAL_RUNTIME TRUE)
 		endif ()
 		message("${cucumber_cpp_runner_ENABLE_HARDENING} ${ENABLE_UBSAN_MINIMAL_RUNTIME} ${cucumber_cpp_runner_ENABLE_SANITIZER_UNDEFINED}")
-		cucumber_cpp_runner_enable_hardening(cucumber_cpp_runner_options ON ${ENABLE_UBSAN_MINIMAL_RUNTIME})
+		cucumber_cpp_runner_enable_hardening(cucumber-cpp-runner-options ON ${ENABLE_UBSAN_MINIMAL_RUNTIME})
 	endif ()
 endmacro()
 
@@ -125,13 +125,13 @@ macro(cucumber_cpp_runner_local_options)
 		include(cmake/StandardProjectSettings.cmake)
 	endif ()
 
-	add_library(cucumber_cpp_runner_warnings INTERFACE)
-	add_library(cucumber_cpp_runner_options INTERFACE)
+	add_library(cucumber-cpp-runner-warnings INTERFACE)
+	add_library(cucumber-cpp-runner-options INTERFACE)
 
 	include(cmake/CompilerWarnings.cmake)
 	cucumber_cpp_runner_set_project_warnings(
-		cucumber_cpp_runner_warnings
-		${cucumber_cpp_runner_WARNINGS_AS_ERRORS}
+		cucumber-cpp-runner-warnings
+		${cucumber-cpp-runner-WARNINGS_AS_ERRORS}
 		""
 		""
 		""
@@ -139,23 +139,23 @@ macro(cucumber_cpp_runner_local_options)
 
 	if (cucumber_cpp_runner_ENABLE_USER_LINKER)
 		include(cmake/Linker.cmake)
-		configure_linker(cucumber_cpp_runner_options)
+		configure_linker(cucumber-cpp-runner-options)
 	endif ()
 
 	include(cmake/Sanitizers.cmake)
 	cucumber_cpp_runner_enable_sanitizers(
-		cucumber_cpp_runner_options
+		cucumber-cpp-runner-options
 		${cucumber_cpp_runner_ENABLE_SANITIZER_ADDRESS}
 		${cucumber_cpp_runner_ENABLE_SANITIZER_LEAK}
 		${cucumber_cpp_runner_ENABLE_SANITIZER_UNDEFINED}
 		${cucumber_cpp_runner_ENABLE_SANITIZER_THREAD}
 		${cucumber_cpp_runner_ENABLE_SANITIZER_MEMORY})
 
-	set_target_properties(cucumber_cpp_runner_options PROPERTIES UNITY_BUILD ${cucumber_cpp_runner_ENABLE_UNITY_BUILD})
+	set_target_properties(cucumber-cpp-runner-options PROPERTIES UNITY_BUILD ${cucumber_cpp_runner_ENABLE_UNITY_BUILD})
 
 	if (cucumber_cpp_runner_ENABLE_PCH)
 		target_precompile_headers(
-			cucumber_cpp_runner_options
+			cucumber-cpp-runner-options
 			INTERFACE
 			<vector>
 			<string>
@@ -169,11 +169,11 @@ macro(cucumber_cpp_runner_local_options)
 
 	include(cmake/StaticAnalyzers.cmake)
 	if (cucumber_cpp_runner_ENABLE_CLANG_TIDY)
-		cucumber_cpp_runner_enable_clang_tidy(cucumber_cpp_runner_options ${cucumber_cpp_runner_WARNINGS_AS_ERRORS})
+		cucumber_cpp_runner_enable_clang_tidy(cucumber-cpp-runner-options ${cucumber-cpp-runner-WARNINGS_AS_ERRORS})
 	endif ()
 
 	if (cucumber_cpp_runner_ENABLE_CPPCHECK)
-		cucumber_cpp_runner_enable_cppcheck(${cucumber_cpp_runner_WARNINGS_AS_ERRORS} "" # override cppcheck options
+		cucumber_cpp_runner_enable_cppcheck(${cucumber-cpp-runner-WARNINGS_AS_ERRORS} "" # override cppcheck options
 		)
 	endif ()
 
@@ -183,14 +183,14 @@ macro(cucumber_cpp_runner_local_options)
 
 	if (cucumber_cpp_runner_ENABLE_COVERAGE)
 		include(cmake/Tests.cmake)
-		cucumber_cpp_runner_enable_coverage(cucumber_cpp_runner_options)
+		cucumber_cpp_runner_enable_coverage(cucumber-cpp-runner-options)
 	endif ()
 
-	if (cucumber_cpp_runner_WARNINGS_AS_ERRORS)
+	if (cucumber-cpp-runner-WARNINGS_AS_ERRORS)
 		check_cxx_compiler_flag("-Wl,--fatal-warnings" LINKER_FATAL_WARNINGS)
 		if (LINKER_FATAL_WARNINGS)
 			# This is not working consistently, so disabling for now
-			# target_link_options(cucumber_cpp_runner_options INTERFACE -Wl,--fatal-warnings)
+			# target_link_options(cucumber-cpp-runner-options INTERFACE -Wl,--fatal-warnings)
 		endif ()
 	endif ()
 
@@ -205,7 +205,7 @@ macro(cucumber_cpp_runner_local_options)
 		else ()
 			set(ENABLE_UBSAN_MINIMAL_RUNTIME TRUE)
 		endif ()
-		cucumber_cpp_runner_enable_hardening(cucumber_cpp_runner_options OFF ${ENABLE_UBSAN_MINIMAL_RUNTIME})
+		cucumber_cpp_runner_enable_hardening(cucumber-cpp-runner-options OFF ${ENABLE_UBSAN_MINIMAL_RUNTIME})
 	endif ()
 
 endmacro()

@@ -1,5 +1,5 @@
-#include <cucumber_cpp_runner/cucumber_cpp_runner.hpp>
-#include <cucumber_cpp_runner/cucumber_cpp_runner_export.hpp>
+#include <cucumber-cpp-runner/cucumber_cpp_runner.hpp>
+#include <cucumber-cpp-runner/cucumber_cpp_runner_export.hpp>
 
 #include <iostream>
 

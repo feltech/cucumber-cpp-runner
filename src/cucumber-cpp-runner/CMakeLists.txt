@@ -1,6 +1,6 @@
 include(GenerateExportHeader)
 
-add_library(cucumber_cpp_runner
+add_library(cucumber-cpp-runner
 	client.cpp
 	server.cpp
 	runner.cpp
@@ -10,14 +10,14 @@ add_library(cucumber_cpp_runner
 )
 
 # Version without main function.
-add_library(cucumber_cpp_runner_nomain
+add_library(cucumber-cpp-runner-nomain
 	client.cpp
 	server.cpp
 	runner.cpp
 )
 
-foreach (target_name cucumber_cpp_runner cucumber_cpp_runner_nomain)
-	add_library(cucumber_cpp_runner::${target_name} ALIAS ${target_name})
+foreach (target_name cucumber-cpp-runner cucumber-cpp-runner-nomain)
+	add_library(CucumberCppRunner::${target_name} ALIAS ${target_name})
 
 	target_link_libraries(
 		${target_name}
@@ -26,8 +26,8 @@ foreach (target_name cucumber_cpp_runner cucumber_cpp_runner_nomain)
 		Boost::filesystem
 		PRIVATE
 		Boost::program_options
-		cucumber_cpp_runner_options
-		cucumber_cpp_runner_warnings
+		cucumber-cpp-runner-options
+		cucumber-cpp-runner-warnings
 		yaml-cpp::yaml-cpp
 		fmt::fmt
 	)
@@ -61,7 +61,7 @@ foreach (target_name cucumber_cpp_runner cucumber_cpp_runner_nomain)
 endforeach ()
 
 generate_export_header(
-	cucumber_cpp_runner
+	cucumber-cpp-runner
 	EXPORT_FILE_NAME
-	${PROJECT_BINARY_DIR}/include/cucumber_cpp_runner/cucumber_cpp_runner_export.hpp
+	${PROJECT_BINARY_DIR}/include/cucumber-cpp-runner/cucumber_cpp_runner_export.hpp
 )

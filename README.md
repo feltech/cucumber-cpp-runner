@@ -26,11 +26,11 @@ Allowed options:
 
 ### Runtime dependencies
 
-* [Ruby](https://www.ruby-lang.org/en/documentation/installation) (>2<3 for `cucumber` client)
+* [Ruby](https://www.ruby-lang.org/en/documentation/installation) (>=2<3 for `cucumber` client)
 * [cucumber](https://github.com/cucumber/cucumber-ruby) - Ruby Gem
-* [cucumber-wire](https://github.com/cucumber/cucumber-ruby-wire) (>6) - Ruby Gem
+* [cucumber-wire](https://github.com/cucumber/cucumber-ruby-wire) (>=6) - Ruby Gem
 * [Boost](https://www.boost.org/) (tested with 1.78)
-* [Cucumber-CPP](https://github.com/cucumber/cucumber-cpp) (tested with main as of 2023-08-28)
+* [Cucumber-CPP](https://github.com/cucumber/cucumber-cpp) (tested with main as of 2023-08)
 
 ### Build dependencies
 
@@ -42,12 +42,19 @@ Allowed options:
 
 #### Libraries
 
-* [Cucumber-CPP](https://github.com/cucumber/cucumber-cpp) (tested with main as of 2023-08-28) -
-  optional, will be downloaded as part of build if not discovered.
-* [Boost](https://www.boost.org/) (tested with 1.78) - see `conan` in instructions below.
+* [Cucumber-CPP](https://github.com/cucumber/cucumber-cpp) (tested with main as of 2023-08) -
+  - Will be downloaded as part of build if not discovered.
+* [Boost](https://www.boost.org/) (tested with 1.78) 
+  - See `conan` in instructions below.
+* [fmt](https://github.com/fmtlib/fmt) (tested with 9.1.0) -
+  - Will be downloaded as part of build if not discovered.
+* [yaml-cpp](https://github.com/jbeder/yaml-cpp) (tested with 0.8.0) -
+  - Will be downloaded as part of build if not discovered.
+
 
 
 ### Linux/MacOS (tested on Ubuntu 20.04)
+
 ```shell
 # Get cucumber command-line client
 bundler install
@@ -70,23 +77,25 @@ conda activate cucumber-cpp-runner-build
 
 As admin:
 
+> Note: Ruby in Conda (used in Linux instructions above) is built with MSVC, but cucumber has a
+dependency on the `ffi` package, which is unavailable for MSVC builds. So below we use
+[Chocolatey](https://docs.chocolatey.org) to get an MSYS2 build of Ruby.
+ 
 ```DOS
-: Note: Ruby in Conda is built with MSVC, but cucumber has a dependency on the `ffi` package, which
-: is unavailable for MSVC builds. So using chocolatey to get an MSYS2 build of Ruby.
 choco install ruby --version 2.7.7.1
 ```
 
-Then:
+Then as normal user:
 
 ```DOS
 : For non-admin non-polluting install (must set GEM_PATH and PATH, though).
 bundler install --binstubs --path .ruby
 set GEM_PATH=%CD%\.ruby\ruby\2.7.0
 set PATH=%CD%\.ruby\ruby\2.7.0\bin;%PATH%
-# Install dependencies not downloaded as part of build.
+: Install dependencies not downloaded as part of build.
 conan install -of .conan .
 set CMAKE_TOOLCHAIN_FILE=%CD%\.conan\conan_toolchain.cmake
-# Build then install to `out/install`. Can switch "msvc" for "clang"; and/or "release" for "debug";
-# and/or remove "-install".
+: Build then install to `out/install`. Can switch "msvc" for "clang"; and/or "release" for "debug";
+: and/or remove "-install".
 cmake --workflow --preset windows-msvc-release-install
 ```

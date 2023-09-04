@@ -1,1 +1,1 @@
-add_subdirectory(cucumber_cpp_runner)
+add_subdirectory(cucumber-cpp-runner)
