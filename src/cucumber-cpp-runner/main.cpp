@@ -20,8 +20,7 @@ CUCUMBER_CPP_RUNNER_EXPORT int main(int argc, char ** argv)
 	using boost::program_options::value;
 	boost::program_options::options_description cmd_options_desc("Allowed options");
 
-	cmd_options_desc.add_options()("help,h", "this help")(
-		"verbose,v", "verbose output")(
+	cmd_options_desc.add_options()("help,h", "this help")("verbose,v", "verbose output")(
 		"features,f", value<std::string>()->default_value("."), "location of feature file(s)")(
 		"cucumber,c", value<std::string>()->default_value("cucumber"), "cucumber executable")(
 		"options,o",
@@ -50,6 +49,11 @@ CUCUMBER_CPP_RUNNER_EXPORT int main(int argc, char ** argv)
 	catch (std::exception & e)
 	{
 		fmt::print(stderr, "{}\n", e.what());
+		return kExitFailure;
+	}
+	catch (...)
+	{
+		fmt::print(stderr, "Unknown exception type caught");
 		return kExitFailure;
 	}
 }
