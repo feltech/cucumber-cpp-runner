@@ -25,8 +25,8 @@ add_executable(
 target_link_libraries(
 	cucumber-cpp-runner.test
 	PRIVATE
-	CucumberCppRunner::cucumber-cpp-runner
-	CucumberCppRunner::cucumber-cpp-runner-options
+	cucumber-cpp-runner::cucumber-cpp-runner
+	cucumber-cpp-runner::cucumber-cpp-runner-options
 )
 
 
@@ -364,8 +364,8 @@ add_executable(
 target_link_libraries(
 	cucumber-cpp-runner.test.nomain
 	PRIVATE
-	CucumberCppRunner::cucumber-cpp-runner-nomain
-	CucumberCppRunner::cucumber-cpp-runner-options
+	cucumber-cpp-runner::cucumber-cpp-runner-nomain
+	cucumber-cpp-runner::cucumber-cpp-runner-options
 )
 
 add_test(

@@ -48,7 +48,7 @@ auto-configure the server based on the `.wire` file discovered in the `step_defi
  
 Two CMake targets are exported
 
-* `CucumberCppRunner::cucumber-cpp-runner` - linking this target to your Cucumber-Cpp step
+* `cucumber-cpp-runner::cucumber-cpp-runner` - linking this target to your Cucumber-Cpp step
   definitions library adds a `main` command-line application (see `--help` text below). This starts
   your server as defined in a `.wire` config file, then launches the `cucumber` command-line client
   to discover and execute your `.feature` files.
@@ -61,7 +61,7 @@ Two CMake targets are exported
       -o [ --options ] arg                  additional cucumber options (surround 
                                             in quotes for multiple)
     ```
-* `CucumberCppRunner::cucumber-cpp-runner-nomain` - linking this target eschews the `main`, allowing
+* `cucumber-cpp-runner::cucumber-cpp-runner-nomain` - linking this target eschews the `main`, allowing
   you to call `cucumber_cpp_runner::execute_cucumber_tests(...)` (found in
   `cucumber-cpp-runner/cucumber_cpp_runner.hpp`) from your own application, passing a configuration
   object:
@@ -74,7 +74,7 @@ Two CMake targets are exported
     std::string cucumber_options{};
     /// Location of features directory, or a specific feature file.
     fs::path feature_path{"."};
-    /// Enable some verbose CucumberCppRunner-specific logs.
+    /// Enable some verbose cucumber-cpp-runner-specific logs.
     bool verbose{false};
     };
     ```

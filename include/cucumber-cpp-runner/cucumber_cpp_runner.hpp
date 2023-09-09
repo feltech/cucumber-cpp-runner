@@ -16,7 +16,7 @@ CUCUMBER_CPP_RUNNER_EXPORT struct CucumberRunnerParams
 	std::string cucumber_options{};
 	/// Location of features directory, or a specific feature file.
 	fs::path feature_path{"."};
-	/// Enable some verbose CucumberCppRunner-specific logs.
+	/// Enable some verbose cucumber-cpp-runner-specific logs.
 	bool verbose{false};
 };
 

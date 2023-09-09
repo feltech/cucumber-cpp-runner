@@ -1,4 +1,3 @@
-include(GenerateExportHeader)
 
 add_library(cucumber-cpp-runner
 	client.cpp
@@ -17,12 +16,15 @@ add_library(cucumber-cpp-runner-nomain
 )
 
 foreach (target_name cucumber-cpp-runner cucumber-cpp-runner-nomain)
-	add_library(CucumberCppRunner::${target_name} ALIAS ${target_name})
+	if (NOT TEST_INSTALLED_VERSION)
+		add_library(cucumber-cpp-runner::${target_name} ALIAS ${target_name})
+	endif ()
 
 	target_link_libraries(
 		${target_name}
 		PUBLIC
 		CucumberCpp::cucumber-cpp-nomain
+		cucumber-cpp-runner-headers
 		Boost::filesystem
 		PRIVATE
 		Boost::program_options
@@ -60,8 +62,3 @@ foreach (target_name cucumber-cpp-runner cucumber-cpp-runner-nomain)
 
 endforeach ()
 
-generate_export_header(
-	cucumber-cpp-runner
-	EXPORT_FILE_NAME
-	${PROJECT_BINARY_DIR}/include/cucumber-cpp-runner/cucumber_cpp_runner_export.hpp
-)

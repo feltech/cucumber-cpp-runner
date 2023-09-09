@@ -15,7 +15,7 @@ endif ()
 
 # Set the project name and language
 project(
-	CucumberCppRunner
+	cucumber-cpp-runner
 	VERSION 1.0.0
 	DESCRIPTION "Execute C++ Gherkin tests with both client and server in a single main"
 	HOMEPAGE_URL "https://github.com/feltech/cucumber-cpp-runner"
@@ -41,10 +41,13 @@ cucumber_cpp_runner_setup_dependencies()
 cucumber_cpp_runner_local_options()
 
 target_compile_features(cucumber-cpp-runner-options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
-add_library(CucumberCppRunner::cucumber-cpp-runner-options ALIAS cucumber-cpp-runner-options)
-add_library(CucumberCppRunner::cucumber-cpp-runner-warnings ALIAS cucumber-cpp-runner-warnings)
+if (NOT TEST_INSTALLED_VERSION)
+	add_library(cucumber-cpp-runner::cucumber-cpp-runner-options ALIAS cucumber-cpp-runner-options)
+	add_library(cucumber-cpp-runner::cucumber-cpp-runner-warnings ALIAS cucumber-cpp-runner-warnings)
+endif ()
 
 # Adding the src:
+add_subdirectory(include)
 add_subdirectory(src)
 
 # Don't even look at tests if we're not top level
@@ -81,6 +84,7 @@ cucumber_cpp_runner_package_project(
 	TARGETS
 	cucumber-cpp-runner
 	cucumber-cpp-runner-nomain
+	cucumber-cpp-runner-headers
 	cucumber-cpp-runner-options
 	cucumber-cpp-runner-warnings
 )
