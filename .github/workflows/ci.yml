@@ -12,6 +12,7 @@ on:
 env:
   CLANG_TIDY_VERSION: "16.0.6"
   VERBOSE: 1
+  CONAN_HOME: ~/.conan
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -24,29 +25,21 @@ jobs:
       fail-fast: false
 
       matrix:
+        # TODO(DF): shared library builds are currently unsupported due issues with Cucumber-Cpp
+        # symbol export.
         build:
           - os: ubuntu-20.04
             compiler: gcc-11
-            generator: "Ninja Multi-Config"
+            preset: unixlike-gcc-test-package
           - os: ubuntu-20.04
             compiler: llvm-13
-            generator: "Ninja Multi-Config"
+            preset: unixlike-clang-test-package
           - os: macos-12
             compiler: false
-            generator: "Ninja Multi-Config"
+            preset: unixlike-clang-test-package
           - os: windows-2019
             compiler: msvc
-            generator: "Visual Studio 16 2019"
-        build_type:
-          - Release
-        build_shared:
-          # Shared library builds are currently unsupported due issues with Cucumber-Cpp symbol
-          # export.
-          - OFF
-        enable_ipo:
-          - ON
-        package_generator:
-          - TGZ
+            preset: windows-msvc-test-package
 
     steps:
       - uses: actions/checkout@v3
@@ -54,23 +47,18 @@ jobs:
       - name: Setup Cache
         uses: ./.github/actions/setup_cache
         with:
-          compiler: ${{ matrix.build.compiler }}
-          build_type: ${{ matrix.build_type }}
-          developer_defaults: OFF
-          generator: ${{ matrix.build.generator }}
-
-      - name: Project Name
-        uses: cardinalby/export-env-action@v2
-        with:
-          envFile: '.github/constants.env'
+          compiler_key: ${{ matrix.build.compiler }}
 
       - name: Setup Cpp
-        uses: aminya/setup-cpp@v1
+        uses: aminya/setup-cpp@v0.35.3
         with:
           compiler: ${{ matrix.build.compiler }}
           vcvarsall: ${{ contains(matrix.build.os, 'windows' )}}
           cmake: true
           ninja: true
+          # TODO(DF): Conan 2's default detected profile has problems on Ubuntu Clang. The default
+          # profile uses compiler.cppstd=gnu14, for which there are no pre-built packages. Changing
+          # this to 17 then gives an error that compiler.runtime must be set, but only for Clang.
           conan: 1.59
           ccache: true
           clangtidy: false
@@ -87,7 +75,7 @@ jobs:
         run: |
           conan profile new default --detect --force
 
-      - name: Linux - Set Conan libstdc++ C++11 ABI
+      - name: Set Conan libstdc++ C++11 ABI
         if: runner.os == 'Linux'
         run: |
           conan profile update settings.compiler.libcxx=libstdc++11 default
@@ -97,56 +85,27 @@ jobs:
           bundler install
           conan install -if ${{ github.workspace }}/.conan --build=missing .
 
-      - name: Configure CMake
-        run: >
-          cmake -S . -B ./build -G "${{matrix.build.generator}}" 
-          -DBUILD_SHARED_LIBS=${{ matrix.build_shared }} 
-          -D${{ env.PROJECT_NAME }}_ENABLE_TESTS=ON
-          -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{ matrix.enable_ipo }} 
-          -DCMAKE_BUILD_TYPE:STRING=${{ matrix.build_type}} 
-          -DGIT_SHA:STRING=${{ github.sha }}
+      - name: Build, test and package
+        run: |
+          cmake --workflow --preset ${{ matrix.build.preset }}
         env:
           CMAKE_PREFIX_PATH: ${{ github.workspace }}/.conan
-
-      - name: Build
-        # Execute the build.  You can specify a specific target with "--target <NAME>"
-        run: |
-          cmake --build ./build --config ${{ matrix.build_type }} --parallel
-
-      - name: Test
-        working-directory: ./build
-        run: |
-          ctest -C ${{matrix.build_type}} --output-on-failure
-
-      - name: CPack
-        if: matrix.package_generator != ''
-        working-directory: ./build
-        run: |
-          cpack -C ${{matrix.build_type}} -G ${{matrix.package_generator}}
+          GIT_SHA: ${{ github.sha }}
 
       - uses: actions/upload-artifact@v3
         with:
           name: packages
-          path: build/*-*${{ matrix.build_type }}*-*.*
+          path: out/package/*-*-*-*-*-*-*.*
 
       - name: Publish Tagged Release
         uses: softprops/action-gh-release@v1
-        if: ${{ startsWith(github.ref, 'refs/tags/') && matrix.package_generator != '' }}
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
         with:
           files: |
-            build/*-*${{ matrix.build_type }}*-*.*
+            out/package/*-*-*-*-*-*-*.*
 
   Lint:
     runs-on: ubuntu-20.04
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - os: ubuntu-20.04
-            compiler: gcc-11
-            generator: "Unix Makefiles"
-            build_type: Debug
-            build_shared: ON
 
     steps:
       - uses: actions/checkout@v3
@@ -154,20 +113,12 @@ jobs:
       - name: Setup Cache
         uses: ./.github/actions/setup_cache
         with:
-          compiler: ${{ matrix.config.compiler }}
-          build_type: ${{ matrix.config.build_type }}
-          developer_defaults: ON
-          generator: ${{ matrix.config.generator }}
-
-      - name: Project Name
-        uses: cardinalby/export-env-action@v2
-        with:
-          envFile: '.github/constants.env'
+          compiler_key: coverage
 
       - name: Setup Cpp
-        uses: aminya/setup-cpp@v1
+        uses: aminya/setup-cpp@v0.35.3
         with:
-          compiler: ${{ matrix.config.compiler }}
+          compiler: gcc-11
           cmake: true
           ninja: true
           conan: 1.59
@@ -194,27 +145,16 @@ jobs:
           bundler install
           conan install -if ${{ github.workspace }}/.conan --build=missing .
 
-      - name: Configure CMake
-        run: >
-          cmake -S . -B ./build -G "${{ matrix.config.generator }}" 
-          -D${{ env.PROJECT_NAME }}_ENABLE_DEVELOPER_DEFAULTS=ON
-          -D${{ env.PROJECT_NAME }}_ENABLE_CACHE=OFF
-          -DCMAKE_BUILD_TYPE:STRING=${{matrix.config.build_type}} 
-          -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=ON 
-          -DGIT_SHA:STRING=${{ github.sha }}
+      - name: Build and test
+        run: |
+          cmake --workflow --preset unixlike-gcc-coverage
         env:
           CMAKE_PREFIX_PATH: ${{ github.workspace }}/.conan
 
-      - name: Build
-        # Execute the build.  You can specify a specific target with "--target <NAME>"
+      - name: Create report
+        working-directory: out/build/unixlike-gcc-coverage
         run: |
-          cmake --build ./build --config ${{matrix.config.build_type}} --parallel
-
-      - name: Test and coverage
-        working-directory: ./build
-        run: |
-          ctest -C ${{matrix.config.build_type}} --output-on-failure
-          gcovr --root ../ --print-summary --xml-pretty --xml coverage.xml . 
+          gcovr --root ${{ github.workspace }} --print-summary --xml-pretty --xml coverage.xml . 
 
       - name: Publish to codecov
         uses: codecov/codecov-action@v3

@@ -44,9 +44,6 @@ target_compile_features(cucumber-cpp-runner-options INTERFACE cxx_std_${CMAKE_CX
 add_library(CucumberCppRunner::cucumber-cpp-runner-options ALIAS cucumber-cpp-runner-options)
 add_library(CucumberCppRunner::cucumber-cpp-runner-warnings ALIAS cucumber-cpp-runner-warnings)
 
-#add_library(CucumberCppRunner::cucumber-cpp-runner-options INTERFACE IMPORTED)
-#add_library(CucumberCppRunner::cucumber-cpp-runner-warnings INTERFACE IMPORTED)
-
 # Adding the src:
 add_subdirectory(src)
 
@@ -91,6 +88,10 @@ cucumber_cpp_runner_package_project(
 # GIT_SHORT_SHA is provided externally, e.g. by CI build.
 # If not provided, assume a developer build.
 if (NOT DEFINED GIT_SHORT_SHA)
+	if (NOT DEFINED GIT_SHA AND DEFINED ENV{GIT_SHA})
+		set(GIT_SHA $ENV{GIT_SHA})
+	endif ()
+
 	if (DEFINED GIT_SHA)
 		string(
 			SUBSTRING "${GIT_SHA}"
@@ -110,7 +111,7 @@ if (BUILD_SHARED_LIBS)
 	set(_library_type shared)
 endif ()
 set(CPACK_PACKAGE_FILE_NAME
-	"${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${GIT_SHORT_SHA}-${CMAKE_SYSTEM_NAME}-${CMAKE_BUILD_TYPE}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}-${_library_type}"
+	"${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${GIT_SHORT_SHA}-${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}-${_library_type}"
 )
 message(STATUS "CPack package file name: '${CPACK_PACKAGE_FILE_NAME}'")
 

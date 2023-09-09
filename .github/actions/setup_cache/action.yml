@@ -1,19 +1,9 @@
 name: 'setup_cache'
 description: 'sets up the shared cache'
 inputs:
-  compiler:
+  compiler_key:
     required: true
-    type: string
-  build_type:
-    required: true
-    type: string
-  generator:
-    required: true
-    type: string
-  developer_defaults:
-    required: true
-    type: string
-
+    description: Compiler to key on
 
 runs:
   using: "composite"
@@ -21,12 +11,12 @@ runs:
     - name: Cache
       uses: actions/cache@v3
       with:
-        # You might want to add .ccache to your cache configuration?
         path: |
           ~/.cache/pip
           ~/.ccache
           ~/.conan
-        key: ${{ runner.os }}-${{ inputs.compiler }}-${{ inputs.build_type }}-${{ inputs.generator }}-${{ inputs.developer_defaults }}-${{ hashFiles('**/CMakeLists.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-${{ inputs.compiler }}-${{ inputs.build_type }}
+        key: v1-${{ runner.os }}-${{ inputs.compiler_key }}-${{ github.sha }}
+        # actions/cache does not overwrite previous cache entries, so use the trick of restoring
+        # most recent key by prefix, then saving changes under a new cache.
+        restore-keys: v1-${{ runner.os }}-${{ inputs.compiler_key }}-
 

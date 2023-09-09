@@ -64,6 +64,13 @@
       }
     },
     {
+      "name": "windows-msvc-test",
+      "inherits": "windows-msvc",
+      "cacheVariables": {
+        "cucumber_cpp_runner_ENABLE_TESTS": "ON"
+      }
+    },
+    {
       "name": "windows-clang",
       "displayName": "clang",
       "description": "Target Windows with the clang compiler",
@@ -79,6 +86,13 @@
       }
     },
     {
+      "name": "windows-clang-test",
+      "inherits": "windows-clang",
+      "cacheVariables": {
+        "cucumber_cpp_runner_ENABLE_TESTS": "ON"
+      }
+    },
+    {
       "name": "unixlike-gcc",
       "displayName": "gcc",
       "description": "Target Unix-like OS with the gcc compiler",
@@ -89,10 +103,17 @@
       }
     },
     {
+      "name": "unixlike-gcc-test",
+      "inherits": "unixlike-gcc",
+      "cacheVariables": {
+        "cucumber_cpp_runner_ENABLE_TESTS": "ON"
+      }
+    },
+    {
       "name": "unixlike-gcc-developer",
       "displayName": "gcc dev mode",
       "description": "Target Unix-like OS with the gcc compiler, linters enabled",
-      "inherits": "unixlike-gcc",
+      "inherits": "unixlike-gcc-test",
       "warnings": {
         "dev": true,
         "uninitialized": true,
@@ -108,6 +129,14 @@
       }
     },
     {
+      "name": "unixlike-gcc-coverage",
+      "inherits": "unixlike-gcc-developer",
+      "cacheVariables": {
+        "cucumber_cpp_runner_ENABLE_CACHE": "OFF",
+        "cucumber_cpp_runner_ENABLE_COVERAGE": "ON"
+      }
+    },
+    {
       "name": "unixlike-clang",
       "displayName": "clang",
       "description": "Target Unix-like OS with the clang compiler",
@@ -116,13 +145,19 @@
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++"
       }
+    },
+    {
+      "name": "unixlike-clang-test",
+      "inherits": "unixlike-clang",
+      "cacheVariables": {
+        "cucumber_cpp_runner_ENABLE_TESTS": "ON"
+      }
     }
   ],
   "buildPresets": [
     {
       "name": "build-common",
-      "hidden": true,
-      "jobs": 0
+      "hidden": true
     },
     {
       "name": "windows-msvc-debug",
@@ -147,6 +182,11 @@
       "targets": "install"
     },
     {
+      "name": "windows-msvc-release-test",
+      "inherits": "windows-msvc-release",
+      "configurePreset": "windows-msvc-test"
+    },
+    {
       "name": "windows-clang-debug",
       "inherits": "build-common",
       "configurePreset": "windows-clang",
@@ -162,6 +202,11 @@
       "inherits": "build-common",
       "configurePreset": "windows-clang",
       "configuration": "Release"
+    },
+    {
+      "name": "windows-clang-release-test",
+      "inherits": "windows-clang-release",
+      "configurePreset": "windows-msvc-test"
     },
     {
       "name": "windows-clang-release-install",
@@ -191,10 +236,21 @@
       "targets": "install"
     },
     {
+      "name": "unixlike-gcc-coverage",
+      "inherits": "build-common",
+      "configurePreset": "unixlike-gcc-coverage",
+      "configuration": "Debug"
+    },
+    {
       "name": "unixlike-gcc-release",
       "inherits": "build-common",
       "configurePreset": "unixlike-gcc",
       "configuration": "Release"
+    },
+    {
+      "name": "unixlike-gcc-release-test",
+      "inherits": "unixlike-gcc-release",
+      "configurePreset": "unixlike-gcc-test"
     },
     {
       "name": "unixlike-gcc-release-install",
@@ -219,6 +275,11 @@
       "configuration": "Release"
     },
     {
+      "name": "unixlike-clang-release-test",
+      "inherits": "unixlike-clang-release",
+      "configurePreset": "unixlike-clang-test"
+    },
+    {
       "name": "unixlike-clang-release-install",
       "inherits": "unixlike-clang-release",
       "targets": "install"
@@ -240,31 +301,31 @@
     {
       "name": "windows-msvc-debug",
       "inherits": "test-common",
-      "configurePreset": "windows-msvc",
+      "configurePreset": "windows-msvc-test",
       "configuration": "Debug"
     },
     {
       "name": "windows-msvc-release",
       "inherits": "test-common",
-      "configurePreset": "windows-msvc",
+      "configurePreset": "windows-msvc-test",
       "configuration": "Release"
     },
     {
       "name": "windows-clang-debug",
       "inherits": "test-common",
-      "configurePreset": "windows-clang",
+      "configurePreset": "windows-clang-test",
       "configuration": "Debug"
     },
     {
       "name": "windows-clang-release",
       "inherits": "test-common",
-      "configurePreset": "windows-clang",
+      "configurePreset": "windows-clang-test",
       "configuration": "Release"
     },
     {
       "name": "unixlike-gcc-debug",
       "inherits": "test-common",
-      "configurePreset": "unixlike-gcc",
+      "configurePreset": "unixlike-gcc-test",
       "configuration": "Debug"
     },
     {
@@ -274,22 +335,56 @@
       "configuration": "Debug"
     },
     {
+      "name": "unixlike-gcc-coverage",
+      "inherits": "test-common",
+      "configurePreset": "unixlike-gcc-coverage",
+      "configuration": "Debug"
+    },
+    {
       "name": "unixlike-gcc-release",
       "inherits": "test-common",
-      "configurePreset": "unixlike-gcc",
+      "configurePreset": "unixlike-gcc-test",
       "configuration": "Release"
     },
     {
       "name": "unixlike-clang-debug",
       "inherits": "test-common",
-      "configurePreset": "unixlike-clang",
+      "configurePreset": "unixlike-clang-test",
       "configuration": "Debug"
     },
     {
       "name": "unixlike-clang-release",
       "inherits": "test-common",
-      "configurePreset": "unixlike-clang",
+      "configurePreset": "unixlike-clang-test",
       "configuration": "Release"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "package-common",
+      "hidden": true,
+      "generators": [
+        "TGZ"
+      ],
+      "packageDirectory": "${sourceDir}/out/package"
+    },
+    {
+      "name": "windows-msvc",
+      "inherits": "package-common",
+      "configurePreset": "windows-msvc-test",
+      "configurations": ["Release"]
+    },
+    {
+      "name": "unixlike-gcc",
+      "inherits": "package-common",
+      "configurePreset": "unixlike-gcc-test",
+      "configurations": ["Release"]
+    },
+    {
+      "name": "unixlike-clang",
+      "inherits": "package-common",
+      "configurePreset": "unixlike-clang-test",
+      "configurations": ["Release"]
     }
   ],
   "workflowPresets": [
@@ -411,6 +506,103 @@
       ]
     },
     {
+      "name": "windows-msvc-test-package",
+      "steps": [
+        {
+          "name": "windows-msvc-test",
+          "type": "configure"
+        },
+        {
+          "name": "windows-msvc-release-test",
+          "type": "build"
+        },
+        {
+          "name": "windows-msvc-release",
+          "type": "test"
+        },
+        {
+          "name": "windows-msvc",
+          "type": "package"
+        }
+      ]
+    },
+    {
+      "name": "unixlike-gcc-test-package",
+      "steps": [
+        {
+          "name": "unixlike-gcc-test",
+          "type": "configure"
+        },
+        {
+          "name": "unixlike-gcc-release-test",
+          "type": "build"
+        },
+        {
+          "name": "unixlike-gcc-release",
+          "type": "test"
+        },
+        {
+          "name": "unixlike-gcc",
+          "type": "package"
+        }
+      ]
+    },
+    {
+      "name": "unixlike-clang-test-package",
+      "steps": [
+        {
+          "name": "unixlike-clang-test",
+          "type": "configure"
+        },
+        {
+          "name": "unixlike-clang-release-test",
+          "type": "build"
+        },
+        {
+          "name": "unixlike-clang-release",
+          "type": "test"
+        },
+        {
+          "name": "unixlike-clang",
+          "type": "package"
+        }
+      ]
+    },
+    {
+      "name": "unixlike-gcc-developer-test",
+      "steps": [
+        {
+          "name": "unixlike-gcc-developer",
+          "type": "configure"
+        },
+        {
+          "name": "unixlike-gcc-developer",
+          "type": "build"
+        },
+        {
+          "name": "unixlike-gcc-developer",
+          "type": "test"
+        }
+      ]
+    },
+    {
+      "name": "unixlike-gcc-coverage",
+      "steps": [
+        {
+          "name": "unixlike-gcc-coverage",
+          "type": "configure"
+        },
+        {
+          "name": "unixlike-gcc-coverage",
+          "type": "build"
+        },
+        {
+          "name": "unixlike-gcc-coverage",
+          "type": "test"
+        }
+      ]
+    },
+    {
       "name": "windows-msvc-debug-install",
       "steps": [
         {
@@ -526,7 +718,6 @@
           "type": "build"
         }
       ]
-    }    
-    
+    }
   ]
 }
