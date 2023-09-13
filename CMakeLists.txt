@@ -47,7 +47,6 @@ if (NOT TEST_INSTALLED_VERSION)
 endif ()
 
 # Adding the src:
-add_subdirectory(include)
 add_subdirectory(src)
 
 # Don't even look at tests if we're not top level
@@ -78,13 +77,10 @@ endif ()
 
 include(cmake/PackageProject.cmake)
 
-# Add other targets that you want installed here, by default we just package the one executable
-# we know we want to ship
 cucumber_cpp_runner_package_project(
 	TARGETS
 	cucumber-cpp-runner
 	cucumber-cpp-runner-nomain
-	cucumber-cpp-runner-headers
 	cucumber-cpp-runner-options
 	cucumber-cpp-runner-warnings
 )

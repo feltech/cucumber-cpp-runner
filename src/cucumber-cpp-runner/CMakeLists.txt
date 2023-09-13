@@ -1,11 +1,10 @@
+include(GenerateExportHeader)
+add_library(cucumber-cpp-runner main.cpp)
 
-add_library(cucumber-cpp-runner
-	client.cpp
-	server.cpp
-	runner.cpp
-	main.cpp
-	client.hpp
-	server.hpp
+generate_export_header(
+	cucumber-cpp-runner
+	EXPORT_FILE_NAME
+	${PROJECT_BINARY_DIR}/include/cucumber-cpp-runner/cucumber_cpp_runner_export.hpp
 )
 
 # Version without main function.
@@ -15,50 +14,61 @@ add_library(cucumber-cpp-runner-nomain
 	runner.cpp
 )
 
-foreach (target_name cucumber-cpp-runner cucumber-cpp-runner-nomain)
-	if (NOT TEST_INSTALLED_VERSION)
-		add_library(cucumber-cpp-runner::${target_name} ALIAS ${target_name})
-	endif ()
+if (NOT TEST_INSTALLED_VERSION)
+	add_library(cucumber-cpp-runner::cucumber-cpp-runner ALIAS cucumber-cpp-runner)
+	add_library(cucumber-cpp-runner::cucumber-cpp-runner-nomain ALIAS cucumber-cpp-runner-nomain)
+endif ()
 
-	target_link_libraries(
-		${target_name}
-		PUBLIC
-		CucumberCpp::cucumber-cpp-nomain
-		cucumber-cpp-runner-headers
-		Boost::filesystem
+target_link_libraries(
+	cucumber-cpp-runner-nomain
+	PUBLIC
+	CucumberCpp::cucumber-cpp-nomain
+	Boost::filesystem
+	PRIVATE
+	cucumber-cpp-runner-options
+	cucumber-cpp-runner-warnings
+	yaml-cpp::yaml-cpp
+	fmt::fmt
+)
+target_sources(
+	cucumber-cpp-runner-nomain
+	PUBLIC
+	FILE_SET headers
+	TYPE HEADERS
+	BASE_DIRS ${PROJECT_SOURCE_DIR}/include ${PROJECT_BINARY_DIR}/include
+	FILES
+	${PROJECT_SOURCE_DIR}/include/cucumber-cpp-runner/cucumber_cpp_runner.hpp
+	${PROJECT_BINARY_DIR}/include/cucumber-cpp-runner/cucumber_cpp_runner_export.hpp
+)
+
+set_target_properties(
+	cucumber-cpp-runner-nomain
+	PROPERTIES VERSION ${PROJECT_VERSION}
+	CXX_VISIBILITY_PRESET hidden
+	VISIBILITY_INLINES_HIDDEN YES
+)
+
+if (WIN32)
+	target_compile_definitions(
+		cucumber-cpp-runner-nomain
 		PRIVATE
-		Boost::program_options
-		cucumber-cpp-runner-options
-		cucumber-cpp-runner-warnings
-		yaml-cpp::yaml-cpp
-		fmt::fmt
+		# For branching by platform within code.
+		CUCUMBER_CPP_RUNNER_IS_WIN32=1
 	)
+endif ()
 
-	target_include_directories(
-		${target_name} ${WARNING_GUARD}
-		PUBLIC
-		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-		$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>)
+if (NOT BUILD_SHARED_LIBS)
+	target_compile_definitions(cucumber-cpp-runner-nomain PUBLIC CUCUMBER_CPP_RUNNER_STATIC_DEFINE)
+endif ()
 
-	set_target_properties(
-		${target_name}
-		PROPERTIES VERSION ${PROJECT_VERSION}
-		CXX_VISIBILITY_PRESET hidden
-		VISIBILITY_INLINES_HIDDEN YES
-	)
 
-	if (WIN32)
-		target_compile_definitions(
-			${target_name}
-			PRIVATE
-			# For branching by platform within code.
-			CUCUMBER_CPP_RUNNER_IS_WIN32=1
-		)
-	endif ()
-
-	if (NOT BUILD_SHARED_LIBS)
-		target_compile_definitions(${target_name} PUBLIC CUCUMBER_CPP_RUNNER_STATIC_DEFINE)
-	endif ()
-
-endforeach ()
-
+target_link_libraries(
+	cucumber-cpp-runner
+	PUBLIC
+	cucumber-cpp-runner-nomain
+	PRIVATE
+	cucumber-cpp-runner-options
+	cucumber-cpp-runner-warnings
+	Boost::program_options
+	fmt::fmt
+)
