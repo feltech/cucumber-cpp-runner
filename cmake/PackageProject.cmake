@@ -73,7 +73,7 @@ function(cucumber_cpp_runner_package_project)
 	set(_PackageProject_EXPORT_DESTINATION "${_PackageProject_CONFIG_EXPORT_DESTINATION}")
 
 	if ("${_PackageProject_CONFIG_INSTALL_DESTINATION}" STREQUAL "")
-		set(_PackageProject_CONFIG_INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/${_PackageProject_NAME}")
+		set(_PackageProject_CONFIG_INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${_PackageProject_NAME}")
 	endif ()
 	set(_PackageProject_INSTALL_DESTINATION "${_PackageProject_CONFIG_INSTALL_DESTINATION}")
 
