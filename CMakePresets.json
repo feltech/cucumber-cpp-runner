@@ -116,7 +116,7 @@
       "inherits": "unixlike-gcc-test",
       "warnings": {
         "dev": true,
-        "uninitialized": true,
+        "uninitialized": false,
         "systemVars": true,
         "unusedCli": true
       },

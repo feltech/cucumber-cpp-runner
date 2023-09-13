@@ -60,7 +60,7 @@ function(cucumber_cpp_runner_cpm_install_package)
 		endif ()
 
 		if (CMAKE_PREFIX_PATH)
-			string(REPLACE ";" "$<SEMICOLON>"_prefix_path "${CMAKE_PREFIX_PATH}")
+			string(REPLACE ";" "$<SEMICOLON>" _prefix_path "${CMAKE_PREFIX_PATH}")
 			list(APPEND args_CMAKE_OPTIONS "-DCMAKE_PREFIX_PATH=${_prefix_path}")
 		endif ()
 
