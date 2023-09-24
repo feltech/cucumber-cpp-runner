@@ -84,11 +84,11 @@ cucumber_cpp_runner_package_project(
 	cucumber-cpp-runner-options
 	cucumber-cpp-runner-warnings
 	PUBLIC_DEPENDENCIES
-	Boost
-	CucumberCpp
+	"Boost REQUIRED"
+	"CucumberCpp REQUIRED"
 	PRIVATE_DEPENDENCIES
-	fmt
-	yaml-cpp
+	"fmt REQUIRED"
+	"yaml-cpp REQUIRED"
 )
 
 # GIT_SHORT_SHA is provided externally, e.g. by CI build.
