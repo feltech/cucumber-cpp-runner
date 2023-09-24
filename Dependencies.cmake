@@ -55,7 +55,7 @@ function(cucumber_cpp_runner_cpm_install_package)
 		if (BUILD_SHARED_LIBS)
 			# In case we're linking a static library into a shared library.
 			list(APPEND args_CMAKE_OPTIONS -DCMAKE_POSITION_INDEPENDENT_CODE=ON)
-		elseif(DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
+		elseif (DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
 			list(APPEND args_CMAKE_OPTIONS -DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE})
 		endif ()
 
@@ -126,13 +126,6 @@ function(cucumber_cpp_runner_setup_dependencies)
 	# A bit heavyweight to bring in through CPM - so require external provision.
 	find_package(Boost REQUIRED)
 
-#	if (NOT TARGET GTest::gtest)
-#		cucumber_cpp_runner_cpm_install_package(
-#			NAME GTest
-#			GITHUB_REPOSITORY google/googletest
-#			GIT_TAG v1.14.0
-#		)
-#	endif ()
 	find_package(CucumberCpp QUIET)
 	if (NOT TARGET CucumberCpp::cucumber-cpp-nomain)
 		set(
@@ -193,6 +186,10 @@ function(cucumber_cpp_runner_setup_dependencies)
 			GITHUB_REPOSITORY jbeder/yaml-cpp
 			GIT_TAG 0.8.0
 		)
+	endif ()
+	if (NOT TARGET yaml-cpp::yaml-cpp)
+		# If install by Conan package, exported CMake target doesn't include the expected namespace.
+		add_library(yaml-cpp::yaml-cpp ALIAS yaml-cpp)
 	endif ()
 
 endfunction()
