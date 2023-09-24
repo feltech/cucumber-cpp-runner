@@ -83,6 +83,12 @@ cucumber_cpp_runner_package_project(
 	cucumber-cpp-runner-nomain
 	cucumber-cpp-runner-options
 	cucumber-cpp-runner-warnings
+	PUBLIC_DEPENDENCIES
+	Boost
+	CucumberCpp
+	PRIVATE_DEPENDENCIES
+	fmt
+	yaml-cpp
 )
 
 # GIT_SHORT_SHA is provided externally, e.g. by CI build.

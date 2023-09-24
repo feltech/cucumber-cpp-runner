@@ -173,7 +173,7 @@ function(cucumber_cpp_runner_package_project)
 		SINGLEVAR_ARGS
 		"${_oneValueArgs};EXPORT_DESTINATION;INSTALL_DESTINATION;NAMESPACE;VARS_PREFIX;EXPORT"
 		MULTIVAR_ARGS
-		"${_multiValueArgs};DEPENDENCIES;PRIVATE_DEPENDENCIES")
+		"${_multiValueArgs};DEPENDENCIES")
 
 	# download ycm
 	FetchContent_Declare(_ycm URL https://github.com/robotology/ycm/archive/refs/tags/v0.13.0.zip)
