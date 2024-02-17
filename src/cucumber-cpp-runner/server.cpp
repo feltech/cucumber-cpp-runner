@@ -7,6 +7,7 @@
 
 #include <iostream>
 
+#include <asio.hpp>
 #include <boost/filesystem/directory.hpp>
 #include <boost/filesystem/string_file.hpp>
 #include <cucumber-cpp/internal/CukeEngineImpl.hpp>
@@ -28,10 +29,10 @@ struct TCPSocketServer : cucumber::internal::TCPSocketServer, SocketServerStopIn
 	using cucumber::internal::TCPSocketServer::TCPSocketServer;
 	void stop() override
 	{
-		boost::asio::io_service service;
-		boost::asio::ip::tcp::socket socket{service};
+		asio::io_service service;
+		asio::ip::tcp::socket socket{service};
 		socket.connect(listenEndpoint());
-		socket.send(boost::asio::buffer("some junk to make it fail"));
+		socket.send(asio::buffer("some junk to make it fail"));
 	}
 };
 
@@ -40,10 +41,10 @@ struct UnixSocketServer : cucumber::internal::UnixSocketServer, SocketServerStop
 	using cucumber::internal::UnixSocketServer::UnixSocketServer;
 	void stop() override
 	{
-		boost::asio::io_service service;
-		boost::asio::local::stream_protocol::socket socket{service};
+		asio::io_service service;
+		asio::local::stream_protocol::socket socket{service};
 		socket.connect(listenEndpoint());
-		socket.send(boost::asio::buffer("some junk to make it fail"));
+		socket.send(asio::buffer("some junk to make it fail"));
 	}
 };
 }  // namespace
@@ -85,7 +86,7 @@ private:
 	bool verbose_;
 
 	cucumber::internal::CukeEngineImpl cuke_engine_{};
-	cucumber::internal::JsonSpiritWireMessageCodec wire_codec_{};
+	cucumber::internal::JsonWireMessageCodec wire_codec_{};
 	cucumber::internal::WireProtocolHandler protocol_handler_{wire_codec_, cuke_engine_};
 
 	std::unique_ptr<cucumber::internal::SocketServer> socket_server_ = [&]
@@ -102,9 +103,9 @@ private:
 		else
 		{
 			auto tcp_server = std::make_unique<TCPSocketServer>(&protocol_handler_);
-			boost::asio::io_service service{};
+			asio::io_service service{};
 			// Use resolver, rather than ip::from_string, in case "localhost" is given.
-			tcp_server->listen(boost::asio::ip::tcp::resolver{service}
+			tcp_server->listen(asio::ip::tcp::resolver{service}
 								   // NOLINT(*-default-arguments-calls)
 								   .resolve(host_, std::to_string(port_))
 								   .begin()
@@ -152,10 +153,10 @@ std::tuple<std::string, int, std::string> parse_wire_config(fs::path const & wir
 		port = config["port"].as<int>();
 	}
 
-// BOOST_ASIO_HAS_LOCAL_SOCKETS _is_ supposedly supported on Windows, but apparently the reuse_addr argument to the
-// stream_protocol::acceptor must be false (not the default). However, we don't have control over the acceptor here,
-// Cucumber-Cpp constructs that and it's private.
-#if !defined BOOST_ASIO_HAS_LOCAL_SOCKETS || defined CUCUMBER_CPP_RUNNER_IS_WIN32
+// ASIO_HAS_LOCAL_SOCKETS _is_ supposedly supported on Windows, but apparently the reuse_addr
+// argument to the stream_protocol::acceptor must be false (not the default). However, we don't have
+// control over the acceptor here, Cucumber-Cpp constructs that and it's private.
+#if !defined ASIO_HAS_LOCAL_SOCKETS || defined CUCUMBER_CPP_RUNNER_IS_WIN32
 	if (!unix_path.empty())
 		throw std::invalid_argument{
 			fmt::format("Unix paths are unsupported on this system: '{}'", unix_path)};

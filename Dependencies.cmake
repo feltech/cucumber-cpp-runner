@@ -60,7 +60,7 @@ function(cucumber_cpp_runner_cpm_install_package)
 		endif ()
 
 		if (CMAKE_PREFIX_PATH)
-			string(REPLACE ";" "$<SEMICOLON>" _prefix_path "${CMAKE_PREFIX_PATH}")
+			string(REPLACE ";" "\;" _prefix_path "${CMAKE_PREFIX_PATH}")
 			list(APPEND args_CMAKE_OPTIONS "-DCMAKE_PREFIX_PATH=${_prefix_path}")
 		endif ()
 
@@ -80,6 +80,8 @@ function(cucumber_cpp_runner_cpm_install_package)
 			-DCMAKE_POLICY_DEFAULT_CMP0091=NEW
 			# Allow `PackageName_ROOT` hint for find_package calls.
 			-DCMAKE_POLICY_DEFAULT_CMP0074=NEW
+			# Allow modifying targets outside dir where its CMakeList is (e.g. for injecting code).
+			-DCMAKE_POLICY_DEFAULT_CMP0079=NEW
 			#			-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
 			-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
 			#			-DCMAKE_CXX_EXTENSIONS=${CMAKE_CXX_EXTENSIONS}
@@ -123,11 +125,52 @@ endfunction()
 # already been provided to us by a parent project
 function(cucumber_cpp_runner_setup_dependencies)
 
+	# TODO(DF): Remove since Cucumber-Cpp no longer requires Boost
 	# A bit heavyweight to bring in through CPM - so require external provision.
 	find_package(Boost REQUIRED)
+	# Cucumber-Cpp dependency: provided by Conan since Git has not CMakeLists.
+	find_package(asio REQUIRED)
+	# Cucumber-Cpp dependency:
+	find_package(nlohmann_json REQUIRED)
+	# TODO(DF) remove - cucumber-cpp main dependency
+	find_package(tclap QUIET)
+	if (NOT TARGET nlohmann_json::nlohmann_json)
+		cucumber_cpp_runner_cpm_install_package(
+			NAME nlohmann_json
+			GITHUB_REPOSITORY nlohmann/json
+			GIT_TAG v3.11.3
+			CMAKE_OPTIONS
+			-DJSON_BuildTests=OFF
+		)
+	endif()
 
 	find_package(CucumberCpp QUIET)
 	if (NOT TARGET CucumberCpp::cucumber-cpp-nomain)
+		# File to patch CucumberCpp's CMake.
+		file(
+			WRITE ${PROJECT_BINARY_DIR}/_deps/cucumbercpp.injected.cmake
+			"
+			function (link_deps)
+				find_package(asio REQUIRED)
+				find_package(nlohmann_json REQUIRED)
+				find_package(tclap REQUIRED)
+				target_link_libraries(cucumber-cpp-internal PRIVATE nlohmann_json::nlohmann_json asio::asio)
+				target_link_libraries(cucumber-cpp PRIVATE asio::asio nlohmann_json::nlohmann_json tclap::tclap)
+				target_link_libraries(cucumber-cpp-nomain PRIVATE asio::asio nlohmann_json::nlohmann_json)
+				install(
+					TARGETS
+						cucumber-cpp-internal
+					EXPORT   CucumberCpp
+					ARCHIVE  DESTINATION \${CMAKE_INSTALL_LIBDIR}
+					LIBRARY  DESTINATION \${CMAKE_INSTALL_LIBDIR}
+					RUNTIME  DESTINATION \${CMAKE_INSTALL_BINDIR}
+				)
+			endfunction()
+			# Defer linking targets til they're all created.
+			cmake_language(DEFER CALL link_deps())
+			"
+		)
+
 		set(
 			_cucumber_cpp_cmake_options
 			# TODO(DF): Can't build as a separate shared lib because:
@@ -142,6 +185,7 @@ function(cucumber_cpp_runner_setup_dependencies)
 			-DCUKE_ENABLE_QT=OFF
 			-DCUKE_TESTS_E2E=OFF
 			-DCUKE_TESTS_UNIT=OFF
+			-DCMAKE_PROJECT_Cucumber-Cpp_INCLUDE=${PROJECT_BINARY_DIR}/_deps/cucumbercpp.injected.cmake
 		)
 
 		# Pass along any external override to Boost static vs. shared.
@@ -153,7 +197,7 @@ function(cucumber_cpp_runner_setup_dependencies)
 		cucumber_cpp_runner_cpm_install_package(
 			NAME CucumberCpp
 			GITHUB_REPOSITORY cucumber/cucumber-cpp
-			GIT_TAG main
+			GIT_TAG v0.7.0
 			FIND_PACKAGE_OPTIONS
 			PATH_SUFFIXES lib/cmake
 			CMAKE_OPTIONS

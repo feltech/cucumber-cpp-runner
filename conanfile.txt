@@ -1,8 +1,11 @@
 [requires]
+# TODO(DF): Remove dependency now that CucumberCpp has too.
 boost/1.78.0
+# Asio doesn't have CMakeLists, so CPM can't be used (easily).
+asio/1.29.0
+# TCLAP doesn't have CMakeLists, so CPM can't be used (easily).
+tclap/1.2.5
 
 [generators]
 CMakeDeps
 CMakeToolchain
-
-

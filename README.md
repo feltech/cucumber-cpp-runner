@@ -12,7 +12,7 @@ Execute C++ [Gherkin](https://cucumber.io/docs/gherkin/) BDD tests with the
 
 ## Why
 
-Cucumber-Cpp works by running a local server, responding to requests via the
+[Cucumber-Cpp](https://github.com/cucumber/cucumber-cpp) works by running a local server, responding to requests via the
 [cucumber-ruby-wire](https://github.com/cucumber/cucumber-ruby-wire) protocol. Actual discovery of
 the `.feature` files, execution and reporting is then performed using the `cucumber` (Ruby)
 command-line client. The client, on discovering a `.wire` config file in the `step_definitions`
@@ -38,7 +38,7 @@ run in a debugger becomes trivial.
 * [cucumber](https://github.com/cucumber/cucumber-ruby) - Ruby Gem
 * [cucumber-wire](https://github.com/cucumber/cucumber-ruby-wire) (>=6) - Ruby Gem
 * [Boost](https://www.boost.org/) (tested with 1.78 - also a dependency of Cucumber-Cpp)
-* [Cucumber-Cpp](https://github.com/cucumber/cucumber-cpp) (tested with main as of 2023-08)
+* [Cucumber-Cpp](https://github.com/cucumber/cucumber-cpp) (v0.7.0)
 
 ### Usage
 

@@ -29,6 +29,7 @@ target_link_libraries(
 	cucumber-cpp-runner-warnings
 	yaml-cpp::yaml-cpp
 	fmt::fmt
+	asio::asio
 )
 target_sources(
 	cucumber-cpp-runner-nomain
