@@ -37,8 +37,6 @@ run in a debugger becomes trivial.
 * [Ruby](https://www.ruby-lang.org/en/documentation/installation) (>=2<3 for `cucumber` client)
 * [cucumber](https://github.com/cucumber/cucumber-ruby) - Ruby Gem
 * [cucumber-wire](https://github.com/cucumber/cucumber-ruby-wire) (>=6) - Ruby Gem
-* [Boost](https://www.boost.org/) (tested with 1.78 - also a dependency of CucumberCpp)
-* [CucumberCpp](https://github.com/cucumber/cucumber-cpp) (v0.7.0)
 
 ### Usage
 
@@ -90,16 +88,16 @@ Two CMake targets are exported
 * Ninja (Linux and MacOS - if using CMake presets)
 * [Conan](https://conan.io/) (>=2) - optional, for installing dependencies in instructions below.
 
-#### Libraries
+#### Library dependencies
 
-* [Cucumber-CPP](https://github.com/cucumber/cucumber-cpp) (tested with main as of 2023-08) -
+* [CucumberCpp](https://github.com/cucumber/cucumber-cpp) (v0.7.0) -
     - Will be downloaded as part of build if not discovered.
-* [Boost](https://www.boost.org/) (tested with 1.78)
-    - See `conan` in instructions below.
-* [fmt](https://github.com/fmtlib/fmt) (tested with 9.1.0) -
-    - Will be downloaded as part of build if not discovered.
-* [yaml-cpp](https://github.com/jbeder/yaml-cpp) (tested with 0.8.0) -
-    - Will be downloaded as part of build if not discovered.
+* [Boost](https://www.boost.org/) (v1.78)
+* [fmt](https://github.com/fmtlib/fmt) (v10.2.1)
+* [yaml-cpp](https://github.com/jbeder/yaml-cpp) (v0.8.0)
+* [asio](https://think-async.com/Asio/) (v1.29.0)
+* [tclap](https://tclap.sourceforge.net/) (v1.2.5)
+* [nlohmann_json](https://github.com/nlohmann/json) (v3.11.3)
 
 ### Linux/MacOS (tested on Ubuntu 20.04)
 
