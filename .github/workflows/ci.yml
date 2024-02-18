@@ -59,7 +59,7 @@ jobs:
           # TODO(DF): Conan 2's default detected profile has problems on Ubuntu Clang. The default
           # profile uses compiler.cppstd=gnu14, for which there are no pre-built packages. Changing
           # this to 17 then gives an error that compiler.runtime must be set, but only for Clang.
-          conan: 1.59
+          conan: 1.63.0
           ccache: true
           clangtidy: false
           cppcheck: false
@@ -121,7 +121,7 @@ jobs:
           compiler: gcc-11
           cmake: true
           ninja: true
-          conan: 1.59
+          conan: 1.63.0
           ccache: false
           clangtidy: ${{ env.CLANG_TIDY_VERSION }}
           cppcheck: true

@@ -27,5 +27,5 @@ dependencies:
   - include-what-you-use
   - cppcheck==1.90
   - cmake
-  - conan==1.59
+  - conan==1.63.0
   - certifi
