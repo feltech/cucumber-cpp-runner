@@ -155,14 +155,6 @@ function(cucumber_cpp_runner_setup_dependencies)
 				target_link_libraries(cucumber-cpp-internal PRIVATE nlohmann_json::nlohmann_json asio::asio)
 				target_link_libraries(cucumber-cpp PRIVATE asio::asio nlohmann_json::nlohmann_json tclap::tclap)
 				target_link_libraries(cucumber-cpp-nomain PRIVATE asio::asio nlohmann_json::nlohmann_json)
-				install(
-					TARGETS
-						cucumber-cpp-internal
-					EXPORT   CucumberCpp
-					ARCHIVE  DESTINATION \${CMAKE_INSTALL_LIBDIR}
-					LIBRARY  DESTINATION \${CMAKE_INSTALL_LIBDIR}
-					RUNTIME  DESTINATION \${CMAKE_INSTALL_BINDIR}
-				)
 			endfunction()
 			# Defer linking targets til they're all created.
 			cmake_language(DEFER CALL link_deps())
@@ -175,11 +167,8 @@ function(cucumber_cpp_runner_setup_dependencies)
 			# > undefined reference to `typeinfo for cucumber::internal::CukeEngine'
 			-DBUILD_SHARED_LIBS=FALSE
 			-DCUKE_ENABLE_GTEST=OFF
-			# It builds the driver regardless, if the boost unit_test_framework target exists, and
-			# then results in a build failure on Windows if disabled.
-			-DCUKE_ENABLE_BOOST_TEST=ON
+			-DCUKE_ENABLE_BOOST_TEST=OFF
 			-DCUKE_ENABLE_QT=OFF
-			-DCUKE_TESTS_E2E=OFF
 			-DCUKE_TESTS_UNIT=OFF
 			-DCMAKE_PROJECT_Cucumber-Cpp_INCLUDE=${PROJECT_BINARY_DIR}/_deps/cucumbercpp.injected.cmake
 		)
