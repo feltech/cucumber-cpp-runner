@@ -366,6 +366,8 @@ target_link_libraries(
 	PRIVATE
 	cucumber-cpp-runner::cucumber-cpp-runner-nomain
 	cucumber-cpp-runner::cucumber-cpp-runner-options
+
+	fmt::fmt
 )
 
 add_test(

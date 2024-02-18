@@ -1,10 +1,29 @@
 [requires]
 # TODO(DF): Remove dependency now that CucumberCpp has too.
 boost/1.78.0
-# Asio doesn't have CMakeLists, so CPM can't be used (easily).
+
+# Async networking library extracted from boost.
+# - Used for interaction with CucumberCpp socket code.
+# - Dependency of CucumberCpp
+# - Doesn't have CMakeLists, so CPM can't be used (easily).
 asio/1.29.0
-# TCLAP doesn't have CMakeLists, so CPM can't be used (easily).
+
+# Command-line parser.
+# - TODO(DF): migrate to use this rather than boost.
+# - Dependency of CucumberCpp
+# - Doesn't have CMakeLists, so CPM can't be used (easily).
 tclap/1.2.5
+
+# JSON parser
+# - Dependency of CucumberCpp
+nlohmann_json/3.11.3
+
+# YAML parser
+# - Used for reading cucumber.wire yaml file
+yaml-cpp/0.8.0
+
+# String formatting
+fmt/10.2.1
 
 [generators]
 CMakeDeps

@@ -128,21 +128,19 @@ function(cucumber_cpp_runner_setup_dependencies)
 	# TODO(DF): Remove since Cucumber-Cpp no longer requires Boost
 	# A bit heavyweight to bring in through CPM - so require external provision.
 	find_package(Boost REQUIRED)
-	# Cucumber-Cpp dependency: provided by Conan since Git has not CMakeLists.
+	# Async socket communication. Also CucumberCpp dependency.
 	find_package(asio REQUIRED)
-	# Cucumber-Cpp dependency:
+	# CucumberCpp (transitive) dependency.
+	# TODO(DF): remove if/when CucumberCpp properly exports its required dependencies (i.e. via
+	# CMake imported target properties).
 	find_package(nlohmann_json REQUIRED)
-	# TODO(DF) remove - cucumber-cpp main dependency
+	# TODO(DF) use instead of boost command_line
+    # CucumberCpp dependency
 	find_package(tclap QUIET)
-	if (NOT TARGET nlohmann_json::nlohmann_json)
-		cucumber_cpp_runner_cpm_install_package(
-			NAME nlohmann_json
-			GITHUB_REPOSITORY nlohmann/json
-			GIT_TAG v3.11.3
-			CMAKE_OPTIONS
-			-DJSON_BuildTests=OFF
-		)
-	endif()
+	# For reading cucumber.wire yaml file
+	find_package(yaml-cpp REQUIRED)
+	# String formatting
+	find_package(fmt REQUIRED)
 
 	find_package(CucumberCpp QUIET)
 	if (NOT TARGET CucumberCpp::cucumber-cpp-nomain)
@@ -173,10 +171,8 @@ function(cucumber_cpp_runner_setup_dependencies)
 
 		set(
 			_cucumber_cpp_cmake_options
-			# TODO(DF): Can't build as a separate shared lib because:
+			# Can't build as a separate shared lib because:
 			# > undefined reference to `typeinfo for cucumber::internal::CukeEngine'
-			# But Cucumber-Cpp is a public dependency, so if we statically link it into a shared
-			# library, then we need to re-export all its symbols, which is not trivial.
 			-DBUILD_SHARED_LIBS=FALSE
 			-DCUKE_ENABLE_GTEST=OFF
 			# It builds the driver regardless, if the boost unit_test_framework target exists, and
@@ -205,35 +201,11 @@ function(cucumber_cpp_runner_setup_dependencies)
 		)
 	endif ()
 
-	# Disallow shared library builds of Cucumber-Cpp
+	# Disallow shared library builds of Cucumber-Cpp. See explanation in top-level CMakeLists re.
+	# BUILD_SHARED_LIBS.
 	get_target_property(_cucumber_cpp_target_type CucumberCpp::cucumber-cpp-nomain TYPE)
 	if (NOT _cucumber_cpp_target_type STREQUAL "STATIC_LIBRARY")
 		message(FATAL_ERROR "Cucumber-Cpp must be provided as a static library")
-	endif ()
-
-	find_package(fmt QUIET)
-	if (NOT TARGET fmt::fmt)
-		cucumber_cpp_runner_cpm_install_package(
-			NAME fmt
-			GITHUB_REPOSITORY fmtlib/fmt
-			GIT_TAG 9.1.0
-			CMAKE_OPTIONS
-			-DFMT_TEST=OFF
-			-DFMT_DOC=OFF
-		)
-	endif ()
-
-	find_package(yaml-cpp QUIET)
-	if (NOT TARGET yaml-cpp::yaml-cpp)
-		cucumber_cpp_runner_cpm_install_package(
-			NAME yaml-cpp
-			GITHUB_REPOSITORY jbeder/yaml-cpp
-			GIT_TAG 0.8.0
-		)
-	endif ()
-	if (NOT TARGET yaml-cpp::yaml-cpp)
-		# If install by Conan package, exported CMake target doesn't include the expected namespace.
-		add_library(yaml-cpp::yaml-cpp ALIAS yaml-cpp)
 	endif ()
 
 endfunction()
