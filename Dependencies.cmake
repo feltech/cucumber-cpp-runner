@@ -1,3 +1,4 @@
+include_guard(GLOBAL)
 include(cmake/CPM.cmake)
 
 # Allow dependencies with e.g. only Release CMake config files to work with Debug project builds.
@@ -14,6 +15,7 @@ set(
 	cucumber_cpp_runner_DEPENDENCY_INSTALL_CACHE_DIR ${PROJECT_BINARY_DIR}/_deps/dist
 	CACHE PATH "Location to install any missing dependencies prior to the build process"
 )
+list(APPEND CMAKE_PREFIX_PATH ${cucumber_cpp_runner_DEPENDENCY_INSTALL_CACHE_DIR})
 
 function(cucumber_cpp_runner_cpm_install_package)
 	cmake_parse_arguments(
@@ -23,8 +25,6 @@ function(cucumber_cpp_runner_cpm_install_package)
 		"NAME;GIT_TAG;GITHUB_REPOSITORY"
 		"FIND_PACKAGE_OPTIONS;CMAKE_OPTIONS"
 	)
-
-	list(APPEND CMAKE_PREFIX_PATH ${cucumber_cpp_runner_DEPENDENCY_INSTALL_CACHE_DIR})
 
 	find_package(
 		${args_NAME} CONFIG
