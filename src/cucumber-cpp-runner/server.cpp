@@ -155,7 +155,7 @@ std::tuple<std::string, int, std::string> parse_wire_config(fs::path const & wir
 
 // ASIO_HAS_LOCAL_SOCKETS _is_ supposedly supported on Windows, but apparently the reuse_addr
 // argument to the stream_protocol::acceptor must be false (not the default). However, we don't have
-// control over the acceptor here, Cucumber-Cpp constructs that and it's private.
+// control over the acceptor here, CucumberCpp constructs that and it's private.
 #if !defined ASIO_HAS_LOCAL_SOCKETS || defined CUCUMBER_CPP_RUNNER_IS_WIN32
 	if (!unix_path.empty())
 		throw std::invalid_argument{

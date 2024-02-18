@@ -26,9 +26,9 @@ include(ProjectOptions.cmake)
 
 if (BUILD_SHARED_LIBS)
 	# TODO(DF):
-	# Cucumber-Cpp does not export all symbols required by this project (i.e CukeEngine),
+	# CucumberCpp does not export all symbols required by this project (i.e CukeEngine),
 	# so they're only accessible via static linking (unless/until we explicitly re-export the
-	# required symbols). This also means that shared library builds of Cucumber-Cpp cannot be used.
+	# required symbols). This also means that shared library builds of CucumberCpp cannot be used.
 	message(FATAL_ERROR "Building as a shared library is not currently supported.")
 endif ()
 set(BUILD_SHARED_LIBS OFF)  # For avoidance of doubt.

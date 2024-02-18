@@ -8,11 +8,11 @@
 
 Execute C++ [Gherkin](https://cucumber.io/docs/gherkin/) BDD tests with the
 [Cucumber](https://github.com/cucumber/cucumber-ruby) client and
-[Cucumber-Cpp](https://github.com/cucumber/cucumber-cpp) server in a single `main`.
+[CucumberCpp](https://github.com/cucumber/cucumber-cpp) server in a single `main`.
 
 ## Why
 
-[Cucumber-Cpp](https://github.com/cucumber/cucumber-cpp) works by running a local server, responding to requests via the
+[CucumberCpp](https://github.com/cucumber/cucumber-cpp) works by running a local server, responding to requests via the
 [cucumber-ruby-wire](https://github.com/cucumber/cucumber-ruby-wire) protocol. Actual discovery of
 the `.feature` files, execution and reporting is then performed using the `cucumber` (Ruby)
 command-line client. The client, on discovering a `.wire` config file in the `step_definitions`
@@ -37,18 +37,18 @@ run in a debugger becomes trivial.
 * [Ruby](https://www.ruby-lang.org/en/documentation/installation) (>=2<3 for `cucumber` client)
 * [cucumber](https://github.com/cucumber/cucumber-ruby) - Ruby Gem
 * [cucumber-wire](https://github.com/cucumber/cucumber-ruby-wire) (>=6) - Ruby Gem
-* [Boost](https://www.boost.org/) (tested with 1.78 - also a dependency of Cucumber-Cpp)
-* [Cucumber-Cpp](https://github.com/cucumber/cucumber-cpp) (v0.7.0)
+* [Boost](https://www.boost.org/) (tested with 1.78 - also a dependency of CucumberCpp)
+* [CucumberCpp](https://github.com/cucumber/cucumber-cpp) (v0.7.0)
 
 ### Usage
 
-See [Cucumber-Cpp](https://github.com/cucumber/cucumber-cpp) - the usage is very similar, the main
+See [CucumberCpp](https://github.com/cucumber/cucumber-cpp) - the usage is very similar, the main
 difference is that cucumber-cpp-runner will take care of executing the `cucumber` client, and will
 auto-configure the server based on the `.wire` file discovered in the `step_definitions` directory.
  
 Two CMake targets are exported
 
-* `cucumber-cpp-runner::cucumber-cpp-runner` - linking this target to your Cucumber-Cpp step
+* `cucumber-cpp-runner::cucumber-cpp-runner` - linking this target to your CucumberCpp step
   definitions library adds a `main` command-line application (see `--help` text below). This starts
   your server as defined in a `.wire` config file, then launches the `cucumber` command-line client
   to discover and execute your `.feature` files.

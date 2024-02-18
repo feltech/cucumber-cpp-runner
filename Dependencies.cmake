@@ -47,8 +47,8 @@ function(cucumber_cpp_runner_cpm_install_package)
 
 		if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 			# Frustratingly, need to keep a list of warnings to disable, for annoying projects
-			# that force `-Werror` even for consumers (e.g. Cucumber-Cpp)
-			# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105329 (affects Cucumber-Cpp)
+			# that force `-Werror` even for consumers (e.g. CucumberCpp)
+			# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105329 (affects CucumberCpp)
 			list(APPEND args_CMAKE_OPTIONS "-DCMAKE_CXX_FLAGS=-Wno-restrict -Wno-unknown-warning-option")
 		endif ()
 
@@ -125,7 +125,7 @@ endfunction()
 # already been provided to us by a parent project
 function(cucumber_cpp_runner_setup_dependencies)
 
-	# TODO(DF): Remove since Cucumber-Cpp no longer requires Boost
+	# TODO(DF): Remove since CucumberCpp no longer requires Boost
 	# A bit heavyweight to bring in through CPM - so require external provision.
 	find_package(Boost REQUIRED)
 	# Async socket communication. Also CucumberCpp dependency.
@@ -190,11 +190,11 @@ function(cucumber_cpp_runner_setup_dependencies)
 		)
 	endif ()
 
-	# Disallow shared library builds of Cucumber-Cpp. See explanation in top-level CMakeLists re.
+	# Disallow shared library builds of CucumberCpp. See explanation in top-level CMakeLists re.
 	# BUILD_SHARED_LIBS.
 	get_target_property(_cucumber_cpp_target_type CucumberCpp::cucumber-cpp-nomain TYPE)
 	if (NOT _cucumber_cpp_target_type STREQUAL "STATIC_LIBRARY")
-		message(FATAL_ERROR "Cucumber-Cpp must be provided as a static library")
+		message(FATAL_ERROR "CucumberCpp must be provided as a static library")
 	endif ()
 
 endfunction()
